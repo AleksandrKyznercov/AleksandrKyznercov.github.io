@@ -20,7 +20,8 @@ var deltaTime = 0;
 var newTime = new Date().getTime();
 var oldTime = new Date().getTime();
 var ennemiesPool = [];
-
+var targetY_global;
+var targetX_global;
 // THREEJS RELATED VARIABLES
 
 var scene,
@@ -540,7 +541,7 @@ function createSky(){
 function soundClick() {
   var audio = new Audio(); // Создаём новый элемент Audio
   audio.src = 'http://cs4.myzuka.fm/dl/71/10644991/28283865/1/0/0/03548580f15113e1f8e1382bbe88acdd/14_robert_parker_love_lost_myzuka.fm.mp3'; // Указываем путь к звуку "клика"
-  audio.volume = 0.2;
+  audio.volume = 0.1;
   audio.autoplay = true; // Автоматически запускаем
 }
 
@@ -561,16 +562,37 @@ function loop(){
   delta++;
 }
 
+
 function updateCar(){
   var targetY = normalize(mousePos.y,-1,0.5,-400, -750);
   var targetX = normalize(mousePos.x,-.75,.75,-380, 380);
-  car.mesh.position.x = targetX;
+  car.mesh.position.x += (targetX - car.mesh.position.x)*0.1;
   car.mesh.position.z = targetY;//+y лево, -y право
-  car.mesh.rotation.y += 0.02;
+  car.mesh.rotation.y = (car.mesh.position.x - targetX)*0.002;
+  car.mesh.rotation.z = (targetX - car.mesh.position.x)*0.0007;
+
+  //car.mesh.rotation.y = 0.40;
+  /*if (targetX_global>targetX && car.mesh.rotation.y < .30){
+    car.mesh.rotation.y += .01;
+  } else if (targetX_global<targetX && car.mesh.rotation.y > -.30){
+    car.mesh.rotation.y -= .01;
+  } else {
+    if (car.mesh.rotation.y) {
+      if (car.mesh.rotation.y < 0){
+        car.mesh.rotation.y += .02
+      } else {
+        car.mesh.rotation.y -= .02
+      }
+    }
+  }*/
+
   wheel1.mesh.rotation.x -= 0.15;
   wheel2.mesh.rotation.x -= 0.15;
   wheel3.mesh.rotation.x -= 0.15;
   wheel4.mesh.rotation.x -= 0.15;
+
+  targetX_global = targetX;
+  targetY_global = targetY;
 
   //airplane.propeller.rotation.x += 0.3;
 }
