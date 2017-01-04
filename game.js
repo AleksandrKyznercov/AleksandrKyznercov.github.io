@@ -238,34 +238,52 @@ Car = function(){
   this.mesh.add(roof);
 
   //Запасное колесо(резина)
-  //var geomWheel = new THREE.CylinderGeometry(45,45,20,60,100);
-  var geomWheel = new THREE.TorusGeometry( 30, 10, 40, 40, 360*Math.PI/180 );
-    //geomWheel.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI/2));
-  var matWheel = new THREE.MeshPhongMaterial({color:Colors.rez, shading:THREE.FlatShading});
-  var wheel = new THREE.Mesh(geomWheel, matWheel);
-  wheel.position.set(30,30,160);
-  wheel.castShadow = true;
-  wheel.receiveShadow = true;
-  this.mesh.add(wheel);
+  Wheel = function(){
+    this.mesh = new THREE.Object3D();
 
-  var geomWheel2 = new THREE.CylinderGeometry(28,28,15,60,100);
-    geomWheel2.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI/2));
-  var matWheel2 = new THREE.MeshPhongMaterial({color:Colors.white2, shading:THREE.FlatShading});
-  var wheel2 = new THREE.Mesh(geomWheel2, matWheel2);
-  wheel2.position.set(30,30,160);
-  wheel2.castShadow = true;
-  wheel2.receiveShadow = true;
-  this.mesh.add(wheel2);
+    var geomWheel = new THREE.TorusGeometry( 30, 10, 40, 8, 360*Math.PI/180 );
+      //geomWheel.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI/2));
+    var matWheel = new THREE.MeshPhongMaterial({color:Colors.grey, shading:THREE.FlatShading});
+    var wheel = new THREE.Mesh(geomWheel, matWheel);
+    wheel.castShadow = true;
+    wheel.receiveShadow = true;
+    this.mesh.add(wheel);
 
-/*  var geom = new THREE.BoxGeometry(100,100,100,1,1);
-  //geom.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI/2));
-  var mat = new THREE.MeshPhongMaterial({
-    color:Colors.green
-  });
-  this.mesh = new THREE.Mesh(geom, mat);
-  this.mesh.receiveShadow = true;
-  this.mesh.castShadow = true;*/
+    var geomWheel2 = new THREE.CylinderGeometry(28,28,15,60,100);
+      geomWheel2.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI/2));
+    var matWheel2 = new THREE.MeshPhongMaterial({color:Colors.white2, shading:THREE.FlatShading});
+    var wheel2 = new THREE.Mesh(geomWheel2, matWheel2);
+    wheel2.castShadow = true;
+    wheel2.receiveShadow = true;
+    this.mesh.add(wheel2);
+    this.mesh.add(wheel);
+  }
+
+  wheel_spare = new Wheel();
+  wheel_spare.mesh.position.set(30,30,160);
+  this.mesh.add(wheel_spare.mesh);
+  // Основные колеса Переднее левое
+  wheel1 = new Wheel();
+  wheel1.mesh.rotation.y = Math.PI/2;
+  wheel1.mesh.position.set(-85,-40,-190);
+  this.mesh.add(wheel1.mesh);
+  // Основные колеса Переднее правое
+  wheel2 = new Wheel();
+  wheel2.mesh.rotation.y = Math.PI/2;
+  wheel2.mesh.position.set(85,-40,-190);
+  this.mesh.add(wheel2.mesh);
+  // Основные колеса Заднее левое
+  wheel3 = new Wheel();
+  wheel3.mesh.rotation.y = Math.PI/2;
+  wheel3.mesh.position.set(-85,-40,80);
+  this.mesh.add(wheel3.mesh);
+  // Основные колеса Заднее правое
+  wheel4 = new Wheel();
+  wheel4.mesh.rotation.y = Math.PI/2;
+  wheel4.mesh.position.set(85,-40,80);
+  this.mesh.add(wheel4.mesh);
 }
+
 
 Sky = function(){
   this.mesh = new THREE.Object3D();
@@ -311,7 +329,7 @@ Ground = function(){
 
 Road = function(){
   var geom = new THREE.BoxGeometry(900,11,10000,1,1);
-  var mat = new THREE.MeshPhongMaterial({
+  var mat = new THREE.MeshStandardMaterial({
     color:Colors.brown
   });
   this.mesh = new THREE.Mesh(geom, mat);
@@ -514,8 +532,8 @@ function createWhiteLine(){
 
 function createCar(){
   car = new Car();
-  car.mesh.scale.set(1.25,1.25,1.25);
-  car.mesh.position.y = -100;
+  car.mesh.scale.set(0.75,0.75,0.75);
+  car.mesh.position.y = -140;//100 при 1.25
   car.mesh.position.z = -600;
   scene.add(car.mesh);
 }
@@ -541,6 +559,10 @@ function createSky(){
 var delta = 0;
 function loop(){
   updatePlane();
+  wheel1.mesh.rotation.x -= 0.15;
+  wheel2.mesh.rotation.x -= 0.15;
+  wheel3.mesh.rotation.x -= 0.15;
+  wheel4.mesh.rotation.x -= 0.15;
   console.log('inUse '+WhiteLinesHolder.ennemiesInUse.length);
   if ((delta%-20) == 0){
     WhiteLinesHolder.spawnWhiteLines();
@@ -577,10 +599,7 @@ function init(event){
   document.addEventListener('mousemove', handleMouseMove, false);
   createScene();
   createLights();
-  //createPlane();
-  //createSea();
-//  createSky();
-createText();
+  //createText();
   createRoad();
   createGround();
   createWhiteLine();

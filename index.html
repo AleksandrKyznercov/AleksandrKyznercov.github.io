@@ -1,11 +1,22 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru-RU" xmlns="http://www.w3.org/1999/html">
 	<head>
 		<title>AirGame</title>
+		<meta charset="UTF-8"/>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta property="og:locale" content="ru_RU">
 		<script type="text/javascript" src="three.js"></script>
     <script type="text/javascript" src="game.js"></script>
-		<link rel="stylesheet" type="text/css" href="../Site/styles.css">
+		<link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
 		<style>
+			*{
+  		 		margin: 0;
+  			  padding: 0;
+  				border: 0;
+  				font-size: 100%;
+  				font: inherit;
+  				vertical-align: baseline;
+					}
 		  .world {
 		      position: absolute;
           width: 100%;
@@ -13,9 +24,31 @@
           background: linear-gradient(#e4e0ba, #f7d9aa);
 		      overflow: hidden;
 		      }
+			.text1 {
+				font-family: 'Press Start 2P', cursive;
+				position: absolute;
+				top: 10px;
+				left: 20px;
+			}
+			.text2 {
+				position: absolute;
+				top: 20px;
+				left: 80px;
+				width: auto;
+			}
+			.by {
+				position: absolute;
+				color: white;
+				font-size: 16px;
+				bottom: 0px;
+				right: 10px;
+			}
 		</style>
 	</head>
 	<body>
+
     <div id="world" class="world"></div>
+		<h1 class="text1">UAZik!<span class="text2"> na flange...</span></h1>
+		<div class="by">Powered by <a href="https://wogames.info/?app=core&module=members&controller=profile&id=2211">[FMF]SANTOR</a></div>
 	</body>
 </html>
