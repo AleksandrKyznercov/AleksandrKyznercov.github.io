@@ -50,7 +50,10 @@ function createScene() {
     nearPlane,
     farPlane
     );
+
+  //Туман
   scene.fog = new THREE.Fog(0xf7d9aa, 10,10000);
+
   camera.position.x = 0;
   camera.position.z = 200;
   camera.position.y = 100;
@@ -178,18 +181,18 @@ Car = function(){
   this.mesh.add(cuzov);
 
   //Двигатель
-  var geomEngine = new THREE.BoxGeometry(180,70,100,1,1,1);
+  var geomEngine = new THREE.BoxGeometry(180,70,120,1,1,1);
   var matEngine = new THREE.MeshPhongMaterial({color:Colors.green, shading:THREE.FlatShading});
   geomEngine.vertices[3].z += 10;
   geomEngine.vertices[6].z += 10;
   var engine = new THREE.Mesh(geomEngine, matEngine);
-  engine.position.set(0,-10,-190);
+  engine.position.set(0,-10,-200);
   engine.castShadow = true;
   engine.receiveShadow = true;
   this.mesh.add(engine);
 
   //Капот
-  var geomEngineСover = new THREE.BoxGeometry(150,20,100,1,1,1);
+  var geomEngineСover = new THREE.BoxGeometry(150,20,120,1,1,1);
   var matEngineСover = new THREE.MeshPhongMaterial({color:Colors.green, shading:THREE.FlatShading});
   geomEngineСover.vertices[1].x -= 5;
   geomEngineСover.vertices[4].x += 5;
@@ -201,7 +204,7 @@ Car = function(){
   geomEngineСover.vertices[5].x -= 15;
   geomEngineСover.vertices[7].x -= 15;
   var engineСover = new THREE.Mesh(geomEngineСover, matEngineСover);
-  engineСover.position.set(0,35,-190);
+  engineСover.position.set(0,35,-200);
   engineСover.castShadow = true;
   engineСover.receiveShadow = true;
   this.mesh.add(engineСover);
@@ -218,6 +221,7 @@ Car = function(){
   kab.castShadow = true;
   kab.receiveShadow = true;
   this.mesh.add(kab);
+
   //Стекло
 
   //Крыша
@@ -241,7 +245,7 @@ Car = function(){
   Wheel = function(){
     this.mesh = new THREE.Object3D();
 
-    var geomWheel = new THREE.TorusGeometry( 30, 10, 40, 8, 360*Math.PI/180 );
+    var geomWheel = new THREE.TorusGeometry( 40, 10, 40, 10, 360*Math.PI/180 );
       //geomWheel.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI/2));
     var matWheel = new THREE.MeshPhongMaterial({color:Colors.grey, shading:THREE.FlatShading});
     var wheel = new THREE.Mesh(geomWheel, matWheel);
@@ -249,7 +253,7 @@ Car = function(){
     wheel.receiveShadow = true;
     this.mesh.add(wheel);
 
-    var geomWheel2 = new THREE.CylinderGeometry(28,28,15,60,100);
+    var geomWheel2 = new THREE.CylinderGeometry(35,35,15,60,100);
       geomWheel2.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI/2));
     var matWheel2 = new THREE.MeshPhongMaterial({color:Colors.white2, shading:THREE.FlatShading});
     var wheel2 = new THREE.Mesh(geomWheel2, matWheel2);
@@ -260,7 +264,7 @@ Car = function(){
   }
 
   wheel_spare = new Wheel();
-  wheel_spare.mesh.position.set(30,30,160);
+  wheel_spare.mesh.position.set(30,30,150);
   this.mesh.add(wheel_spare.mesh);
   // Основные колеса Переднее левое
   wheel1 = new Wheel();
@@ -275,15 +279,14 @@ Car = function(){
   // Основные колеса Заднее левое
   wheel3 = new Wheel();
   wheel3.mesh.rotation.y = Math.PI/2;
-  wheel3.mesh.position.set(-85,-40,80);
+  wheel3.mesh.position.set(-85,-40,70);
   this.mesh.add(wheel3.mesh);
   // Основные колеса Заднее правое
   wheel4 = new Wheel();
   wheel4.mesh.rotation.y = Math.PI/2;
-  wheel4.mesh.position.set(85,-40,80);
+  wheel4.mesh.position.set(85,-40,70);
   this.mesh.add(wheel4.mesh);
 }
-
 
 Sky = function(){
   this.mesh = new THREE.Object3D();
@@ -345,8 +348,6 @@ Road = function(){
   this.mesh.receiveShadow = true;
 }*/
 
-
-
 Cloud = function(){
   this.mesh = new THREE.Object3D();
   this.mesh.name = "cloud";
@@ -407,7 +408,6 @@ WhiteLinesHolder = function (){
 }
 
 WhiteLinesHolder.prototype.spawnWhiteLines = function(){
-  //var nEnnemies = int(1000/800);
 
   //for (var i=0; i<10000; i+=800){
     var ennemy;
@@ -467,6 +467,7 @@ WhiteLinesHolder.prototype.rotateWhiteLines = function(){
   }
 }
 
+
 // 3D Models
 var sea;
 var airplane;
@@ -498,16 +499,6 @@ function createRoad(){
   scene.add(road.mesh);
 }
 
-/*function createEnnemies(){
-  for (var i=0; i<10; i++){
-    var ennemy = new Ennemy();
-    ennemiesPool.push(ennemy);
-  }
-  ennemiesHolder = new EnnemiesHolder();
-  //ennemiesHolder.mesh.position.y = -game.seaRadius;
-  scene.add(ennemiesHolder.mesh)
-}*/
-
 function createWhiteLine(){
   for (var i = 0; i < 10000; i += 800){
     var ennemy = new WhiteLine();
@@ -516,24 +507,13 @@ function createWhiteLine(){
     ennemiesPool.push(ennemy);
   }
   WhiteLinesHolder = new WhiteLinesHolder();
-  //ennemiesHolder.mesh.position.y = -game.seaRadius;
   scene.add(WhiteLinesHolder.mesh)
-
-  /*for (var i = 0; i < 10000; i += 800){
-    var ennemy = new WhiteLine();
-    ennemy.mesh.position.y = -200;
-    ennemy.mesh.position.z = -i;
-    ennemiesPool.push(ennemy);
-  }
-  WhiteLinesHolder = new WhiteLinesHolder();
-  //ennemiesHolder.mesh.position.y = -game.seaRadius;
-  scene.add(WhiteLinesHolder.mesh)*/
 }
 
 function createCar(){
   car = new Car();
   car.mesh.scale.set(0.75,0.75,0.75);
-  car.mesh.position.y = -140;//100 при 1.25
+  car.mesh.position.y = -135//100 при 1.25
   car.mesh.position.z = -600;
   scene.add(car.mesh);
 }
@@ -559,18 +539,15 @@ function createSky(){
 
 function soundClick() {
   var audio = new Audio(); // Создаём новый элемент Audio
-  audio.src = 'http://r5---sn-5hne6n7z.googlevideo.com/videoplayback?dur=219.892&clen=3492965&mime=audio%2Fmp4&key=cms1&itag=140&gir=yes&pl=23&expire=1483553496&ip=62.245.42.183&upn=v7-qdHy7e50&id=o-ADXtGgh2sUuQ715cUeEOc2Y34XU6A8kGCi4KE1WO816U&signature=6B7D02DD2F527239188119866017997E7C2CDF5B.1D3440533BE7761BFE432F8B8DEC18C3014384F0&ipbits=0&sparams=clen,dur,expire,gir,id,initcwndbps,ip,ipbits,itag,lmt,mime,mm,mn,ms,mv,nh,pl,source,upn&lmt=1448606253928836&source=youtube&title=%D0%92+%D0%BC%D0%B8%D1%80%D0%B5+%D0%A4%D0%BE%D0%BA%D1%81%D0%BE%D0%B2&redirect_counter=1&cm2rm=sn-aigely7s&req_id=7a64a5b4d1eaa3ee&cms_redirect=yes&mm=34&mn=sn-5hne6n7z&ms=ltu&mt=1483531860&mv=u&nh=IgpwcjAyLnN2bzAzKgkxMjcuMC4wLjE'; // Указываем путь к звуку "клика"
+  audio.src = 'http://cs4.myzuka.fm/dl/71/10644991/28283865/1/0/0/03548580f15113e1f8e1382bbe88acdd/14_robert_parker_love_lost_myzuka.fm.mp3'; // Указываем путь к звуку "клика"
   audio.volume = 0.2;
   audio.autoplay = true; // Автоматически запускаем
 }
 
 var delta = 0;
 function loop(){
-  updatePlane();
-  wheel1.mesh.rotation.x -= 0.15;
-  wheel2.mesh.rotation.x -= 0.15;
-  wheel3.mesh.rotation.x -= 0.15;
-  wheel4.mesh.rotation.x -= 0.15;
+  updateCar();
+
   console.log('inUse '+WhiteLinesHolder.ennemiesInUse.length);
   if ((delta%-20) == 0){
     WhiteLinesHolder.spawnWhiteLines();
@@ -584,13 +561,17 @@ function loop(){
   delta++;
 }
 
-function updatePlane(){
-  var targetY = normalize(mousePos.y,-.75,.75,25, 175);
-  var targetX = normalize(mousePos.x,-.75,.75,-100, 100);
-  //airplane.mesh.position.y = targetY;
-  //airplane.mesh.position.x = targetX;
-  car.mesh.position.x = normalize(mousePos.x,-1,1,-400, 400);
-  car.mesh.position.z = normalize(mousePos.y,-1,1,-400, -750);
+function updateCar(){
+  var targetY = normalize(mousePos.y,-1,0.5,-400, -750);
+  var targetX = normalize(mousePos.x,-.75,.75,-380, 380);
+  car.mesh.position.x = targetX;
+  car.mesh.position.z = targetY;//+y лево, -y право
+  car.mesh.rotation.y += 0.02;
+  wheel1.mesh.rotation.x -= 0.15;
+  wheel2.mesh.rotation.x -= 0.15;
+  wheel3.mesh.rotation.x -= 0.15;
+  wheel4.mesh.rotation.x -= 0.15;
+
   //airplane.propeller.rotation.x += 0.3;
 }
 
@@ -612,7 +593,7 @@ function init(event){
   createGround();
   createWhiteLine();
   createCar();
-  soundClick();
+  //soundClick();
   loop();
 }
 
