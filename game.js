@@ -556,6 +556,14 @@ function createSky(){
   sky.mesh.position.y = -600;
   scene.add(sky.mesh);
 }
+
+function soundClick() {
+  var audio = new Audio(); // Создаём новый элемент Audio
+  audio.src = 'http://r5---sn-5hne6n7z.googlevideo.com/videoplayback?dur=219.892&clen=3492965&mime=audio%2Fmp4&key=cms1&itag=140&gir=yes&pl=23&expire=1483553496&ip=62.245.42.183&upn=v7-qdHy7e50&id=o-ADXtGgh2sUuQ715cUeEOc2Y34XU6A8kGCi4KE1WO816U&signature=6B7D02DD2F527239188119866017997E7C2CDF5B.1D3440533BE7761BFE432F8B8DEC18C3014384F0&ipbits=0&sparams=clen,dur,expire,gir,id,initcwndbps,ip,ipbits,itag,lmt,mime,mm,mn,ms,mv,nh,pl,source,upn&lmt=1448606253928836&source=youtube&title=%D0%92+%D0%BC%D0%B8%D1%80%D0%B5+%D0%A4%D0%BE%D0%BA%D1%81%D0%BE%D0%B2&redirect_counter=1&cm2rm=sn-aigely7s&req_id=7a64a5b4d1eaa3ee&cms_redirect=yes&mm=34&mn=sn-5hne6n7z&ms=ltu&mt=1483531860&mv=u&nh=IgpwcjAyLnN2bzAzKgkxMjcuMC4wLjE'; // Указываем путь к звуку "клика"
+  audio.volume = 0.2;
+  audio.autoplay = true; // Автоматически запускаем
+}
+
 var delta = 0;
 function loop(){
   updatePlane();
@@ -604,6 +612,7 @@ function init(event){
   createGround();
   createWhiteLine();
   createCar();
+  soundClick();
   loop();
 }
 
