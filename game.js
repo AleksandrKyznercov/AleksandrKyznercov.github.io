@@ -15,7 +15,68 @@ var Colors = {
 };
 
 // GAME VARIABLES
-var game;
+var game = {speed:100,
+        initSpeed:.00035,
+        baseSpeed:.00035,
+        targetBaseSpeed:.00035,
+        incrementSpeedByTime:.0000025,
+        incrementSpeedByLevel:.000005,
+        distanceForSpeedUpdate:100,
+        speedLastUpdate:0,
+        maxSpeed:200,
+
+        distance:0,
+        ratioSpeedDistance:50,
+        energy:100,
+        ratioSpeedEnergy:3,
+
+        level:1,
+        levelLastUpdate:0,
+        distanceForLevelUpdate:1000,
+
+        planeDefaultHeight:100,
+        planeAmpHeight:80,
+        planeAmpWidth:75,
+        planeMoveSensivity:0.005,
+        planeRotXSensivity:0.0008,
+        planeRotZSensivity:0.0004,
+        planeFallSpeed:.001,
+        planeMinSpeed:1.2,
+        planeMaxSpeed:1.6,
+        planeSpeed:0,
+        planeCollisionDisplacementX:0,
+        planeCollisionSpeedX:0,
+
+        planeCollisionDisplacementY:0,
+        planeCollisionSpeedY:0,
+
+        seaRadius:600,
+        seaLength:800,
+        //seaRotationSpeed:0.006,
+        wavesMinAmp : 5,
+        wavesMaxAmp : 20,
+        wavesMinSpeed : 0.001,
+        wavesMaxSpeed : 0.003,
+
+        cameraFarPos:500,
+        cameraNearPos:150,
+        cameraSensivity:0.002,
+
+        coinDistanceTolerance:15,
+        coinValue:3,
+        coinsSpeed:.5,
+        coinLastSpawn:0,
+        distanceForCoinsSpawn:100,
+
+        ennemyDistanceTolerance:10,
+        ennemyValue:10,
+        ennemiesSpeed:.6,
+        ennemyLastSpawn:0,
+        distanceForEnnemiesSpawn:50,
+
+        status : "starting",
+       };
+
 var deltaTime = 0;
 var newTime = new Date().getTime();
 var oldTime = new Date().getTime();
@@ -67,6 +128,76 @@ function createScene() {
 
   window.addEventListener('resize', handleWindowResize, false);
 }
+function startGame(){
+}
+
+function resetGame(){
+  messageStart.style.display = "none";
+  game.speed=100;
+  game.initSpeed=.00035;
+  game.baseSpeed=.00035;
+          game.targetBaseSpeed=.00035;
+          game.incrementSpeedByTime=.0000025;
+          game.incrementSpeedByLevel=.000005;
+          game.distanceForSpeedUpdate=100;
+          game.speedLastUpdate=0;
+game.maxSpeed=100;
+
+          game.distance=0;
+          game.ratioSpeedDistance=50;
+          game.energy=100;
+          game.ratioSpeedEnergy=3;
+
+          game.level=1;
+          game.levelLastUpdate=0;
+          game.distanceForLevelUpdate=1000;
+
+          /*game.planeDefaultHeight:100;
+          game.planeAmpHeight:80;
+          game.planeAmpWidth:75;
+          game.planeMoveSensivity:0.005;
+          game.planeRotXSensivity:0.0008;
+          game.planeRotZSensivity:0.0004;
+          game.planeFallSpeed:.001;
+          game.planeMinSpeed:1.2;
+          game.planeMaxSpeed:1.6;
+          game.planeSpeed:0;
+          game.planeCollisionDisplacementX:0;
+          game.planeCollisionSpeedX:0;
+
+          game.planeCollisionDisplacementY:0;
+          game.planeCollisionSpeedY:0,
+
+          game.seaRadius:600;
+          game.seaLength:800;
+          //seaRotationSpeed:0.006,
+          game.wavesMinAmp : 5;
+          game.wavesMaxAmp : 20;
+          game.wavesMinSpeed : 0.001;
+          game.wavesMaxSpeed : 0.003;
+
+          game.cameraFarPos:500;
+          game.cameraNearPos:150;
+          game.cameraSensivity:0.002;
+
+          game.coinDistanceTolerance:15;
+          game.coinValue:3;
+          game.coinsSpeed:.5;
+          game.coinLastSpawn:0;
+          game.distanceForCoinsSpawn:100;
+
+          game.ennemyDistanceTolerance:10;
+          game.ennemyValue:10;
+          game.ennemiesSpeed:.6;
+          game.ennemyLastSpawn:0;
+          game.distanceForEnnemiesSpawn:50;*/
+
+          game.status = "playing";
+
+  distanceLabel.innerHTML = game.distance;
+  playEngineLow();
+  engHolost.pause();
+}
 
 // HANDLE SCREEN EVENTS
 
@@ -101,7 +232,6 @@ function createLights() {
   scene.add(hemisphereLight);
   scene.add(shadowLight);
 }
-
 
 
 var AirPlane = function(){
@@ -429,7 +559,9 @@ WhiteLinesHolder.prototype.spawnWhiteLines = function(){
 WhiteLinesHolder.prototype.rotateWhiteLines = function(){
   for (var i=0; i<this.ennemiesInUse.length; i++){
     var ennemy = this.ennemiesInUse[i];
-    ennemy.mesh.position.z += 100;
+
+      ennemy.mesh.position.z += game.speed;
+
     //console.log(this.ennemiesInUse.length);
     if (ennemy.mesh.position.z > 0) {
       //this.ennemiesInUse.splice(i,1)[0];
@@ -538,28 +670,72 @@ function createSky(){
   scene.add(sky.mesh);
 }
 
-function soundClick() {
+
+//MUSIC
+
+
+  var soundEngStart = new Audio(); // Создаём новый элемент Audio
+  soundEngStart.src = 'sound/int-uaz-start.wav'; // Указываем путь к звуку "клика"
+  soundEngStart.volume = 0.1;
+  soundEngStart.autoplay = true; // Автоматически запускаем
+
+
+function playGudok() {
   var audio = new Audio(); // Создаём новый элемент Audio
-  audio.src = 'http://cs4.myzuka.fm/dl/71/10644991/28283865/1/0/0/03548580f15113e1f8e1382bbe88acdd/14_robert_parker_love_lost_myzuka.fm.mp3'; // Указываем путь к звуку "клика"
+  audio.src = 'sound/int-uaz-horn.wav'; // Указываем путь к звуку "клика"
   audio.volume = 0.1;
-  audio.autoplay = true; // Автоматически запускаем
+  audio.autoplay = true;
 }
+
+function playEngineLow() {
+  var audio = new Audio(); // Создаём новый элемент Audio
+  audio.src = 'sound/int-uaz-engine-low.wav'; // Указываем путь к звуку "клика"
+  audio.volume = 0.1;
+  audio.autoplay = true;
+  audio.loop = true;
+}
+
+function playEngineHigh() {
+  var audio = new Audio(); // Создаём новый элемент Audio
+  audio.src = 'sound/int-uaz-engine-high.wav'; // Указываем путь к звуку "клика"
+  audio.volume = 0.1;
+  audio.autoplay = true;
+  audio.loop = true;
+}
+
+function gameOver() {
+  game.status = "gameover";
+}
+
+var engHolost = new Audio(); // Создаём новый элемент Audio
+engHolost.src = 'sound/int-uaz-idle.wav'; // Указываем путь к звуку "клика"
+engHolost.volume = 0.1;
+engHolost.loop = true;
 
 var delta = 0;
 function loop(){
-  updateCar();
-
-  console.log('inUse '+WhiteLinesHolder.ennemiesInUse.length);
-  if ((delta%-20) == 0){
-    WhiteLinesHolder.spawnWhiteLines();
+if (game.status == "starting"){
+  if (soundEngStart.currentTime){
+    engHolost.play();
   }
-  WhiteLinesHolder.rotateWhiteLines();
-  //sea.mesh.rotation.z += .005;
-  //sky.mesh.rotation.z += .01;
-  //whiteLine.mesh.position.z += 100;
+}
+if (game.status == "playing") {
+  updateCar();
+  if (game.speed<game.maxSpeed){
+    game.speed += 0.05;
+  }
+  console.log('inUse '+WhiteLinesHolder.ennemiesInUse.length);
+    if ((delta%-20) == 0){
+      WhiteLinesHolder.spawnWhiteLines();
+    }
+    WhiteLinesHolder.rotateWhiteLines();
+    game.distance++;
+    distanceLabel.innerHTML = game.distance;
+  }
   renderer.render(scene, camera);
   requestAnimationFrame(loop);
   delta++;
+
 }
 
 
@@ -570,31 +746,12 @@ function updateCar(){
   car.mesh.position.z = targetY;//+y лево, -y право
   car.mesh.rotation.y = (car.mesh.position.x - targetX)*0.002;
   car.mesh.rotation.z = (targetX - car.mesh.position.x)*0.0007;
-
-  //car.mesh.rotation.y = 0.40;
-  /*if (targetX_global>targetX && car.mesh.rotation.y < .30){
-    car.mesh.rotation.y += .01;
-  } else if (targetX_global<targetX && car.mesh.rotation.y > -.30){
-    car.mesh.rotation.y -= .01;
-  } else {
-    if (car.mesh.rotation.y) {
-      if (car.mesh.rotation.y < 0){
-        car.mesh.rotation.y += .02
-      } else {
-        car.mesh.rotation.y -= .02
-      }
-    }
-  }*/
-
-  wheel1.mesh.rotation.x -= 0.15;
-  wheel2.mesh.rotation.x -= 0.15;
-  wheel3.mesh.rotation.x -= 0.15;
-  wheel4.mesh.rotation.x -= 0.15;
-
+  wheel1.mesh.rotation.x -= game.speed/70;//0.15;
+  wheel2.mesh.rotation.x -= game.speed/70;
+  wheel3.mesh.rotation.x -= game.speed/70;
+  wheel4.mesh.rotation.x -= game.speed/70;
   targetX_global = targetX;
   targetY_global = targetY;
-
-  //airplane.propeller.rotation.x += 0.3;
 }
 
 function normalize(v,vmin,vmax,tmin, tmax){
@@ -607,15 +764,30 @@ function normalize(v,vmin,vmax,tmin, tmax){
 }
 
 function init(event){
-  document.addEventListener('mousemove', handleMouseMove, false);
+
+  distanceLabel = document.getElementById("distance");
+  messageStart = document.getElementById("messageStart");
+  /*energyBar = document.getElementById("energyBar");
+  replayMessage = document.getElementById("replayMessage");
+  fieldLevel = document.getElementById("levelValue");
+  levelCircle = document.getElementById("levelCircleStroke");*/
+
+  //resetGame();
+
   createScene();
+
   createLights();
   //createText();
   createRoad();
   createGround();
   createWhiteLine();
   createCar();
-  //soundClick();
+  //soundEngStart();
+
+  messageStart.addEventListener('click', resetGame, false);
+  document.addEventListener('mousemove', handleMouseMove, false);
+  document.addEventListener('click', playGudok, false);
+
   loop();
 }
 

@@ -92,12 +92,42 @@
 				font-size: 10px;
 				text-align: center;
 			}
+			.distance {
+				font-family: 'Press Start 2P', cursive;
+				position: absolute;
+				top: 38px;
+				left: 340px;
+				font-size: 16px;
+			/*	text-align: center;*/
+			}
+			.messageStart {
+				font-family: 'Press Start 2P', cursive;
+				position: absolute;
+				bottom: 50vh;
+				left: 0;
+				width: 100%;
+				text-align: center;
+				text-transform: uppercase;
+				font-size: 28px;
+			}
+			.distance_text {
+				font-family: 'Press Start 2P', cursive;
+				position: absolute;
+				top: 6px;
+				left: 300px;
+				font-size: 12px;
+			/*	text-align: center;*/
+			}
 		</style>
 	</head>
 	<body>
 
-    <div id="world" class="world"></div>
+    <div id="world" class="world"><div id="messageStart" class="messageStart">START</div></div>
 		<h1 class="text1">UAZik!<span class="text2"> na flange...</span></h1>
+
+		<div id="distance_text" class="distance_text">Уазик не <br>горел уже:</div>
+		<div id="distance" class="distance"></div>
+
 		<div id="fuel_level" class="fuel_level"></div>
 		<div id="hull" class="hull">HULL</div>
 		<div id="eng" class="eng">ENG</div>
