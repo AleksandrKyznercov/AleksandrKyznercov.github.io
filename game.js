@@ -89,12 +89,62 @@ var scene,
     camera, fieldOfView, aspectRatio, nearPlane, farPlane,
     renderer, container;
 
+
+//MUSIC
+
+var soundEngStart = new Audio(); // Создаём новый элемент Audio
+  soundEngStart.src = 'sound/int-uaz-start.wav'; // Указываем путь к звуку "клика"
+  soundEngStart.volume = 0.1;
+  soundEngStart.autoplay = true; // Автоматически запускаем
+
+var soundEngineLow = new Audio(); // Создаём новый элемент Audio
+  soundEngineLow.src = 'sound/int-uaz-engine-low.wav'; // Указываем путь к звуку "клика"
+  soundEngineLow.volume = 0.1;
+  soundEngineLow.loop = true;
+
+var soundEngineHigh = new Audio(); // Создаём новый элемент Audio
+  soundEngineHigh.src = 'sound/int-uaz-engine-high.wav'; // Указываем путь к звуку "клика"
+  soundEngineHigh.volume = 0.1;
+  soundEngineHigh.loop = true;
+
+var engHolost = new Audio(); // Создаём новый элемент Audio
+  engHolost.src = 'sound/int-uaz-idle.wav'; // Указываем путь к звуку "клика"
+  engHolost.volume = 0.1;
+  engHolost.loop = true;
+
+function playGudok() {
+  if ((game.status == "playing") && (soundButton.value == "Вкл")){
+    var audio = new Audio(); // Создаём новый элемент Audio
+    audio.src = 'sound/int-uaz-horn.wav'; // Указываем путь к звуку "клика"
+    audio.volume = 0.1;
+    audio.autoplay = true;
+  }
+}
+
+function soundMute() {
+  if (soundButton.value == "Вкл"){
+    soundEngStart.muted = true;
+    soundEngineLow.muted = true;
+    soundEngineHigh.muted = true;
+    engHolost.muted = true;
+    soundButton.value = "Выкл";soundButton.innerHTML = "Выкл";
+  }else{
+    soundEngStart.muted = false;
+    soundEngineLow.muted = false;
+    soundEngineHigh.muted = false;
+    engHolost.muted = false;
+    soundButton.value = "Вкл";soundButton.innerHTML = "Вкл";
+  }
+
+}
+
 //SCREEN & MOUSE VARIABLES
 
 var HEIGHT, WIDTH,
     mousePos = { x: 0, y: 0 };
 
 //INIT THREE JS, SCREEN AND MOUSE EVENTS
+
 
 function createScene() {
 
@@ -195,7 +245,7 @@ game.maxSpeed=100;
           game.status = "playing";
 
   distanceLabel.innerHTML = game.distance;
-  playEngineLow();
+  soundEngineLow.play();
   engHolost.pause();
 }
 
@@ -671,46 +721,9 @@ function createSky(){
 }
 
 
-//MUSIC
-
-
-  var soundEngStart = new Audio(); // Создаём новый элемент Audio
-  soundEngStart.src = 'sound/int-uaz-start.wav'; // Указываем путь к звуку "клика"
-  soundEngStart.volume = 0.1;
-  soundEngStart.autoplay = true; // Автоматически запускаем
-
-
-function playGudok() {
-  var audio = new Audio(); // Создаём новый элемент Audio
-  audio.src = 'sound/int-uaz-horn.wav'; // Указываем путь к звуку "клика"
-  audio.volume = 0.1;
-  audio.autoplay = true;
-}
-
-function playEngineLow() {
-  var audio = new Audio(); // Создаём новый элемент Audio
-  audio.src = 'sound/int-uaz-engine-low.wav'; // Указываем путь к звуку "клика"
-  audio.volume = 0.1;
-  audio.autoplay = true;
-  audio.loop = true;
-}
-
-function playEngineHigh() {
-  var audio = new Audio(); // Создаём новый элемент Audio
-  audio.src = 'sound/int-uaz-engine-high.wav'; // Указываем путь к звуку "клика"
-  audio.volume = 0.1;
-  audio.autoplay = true;
-  audio.loop = true;
-}
-
 function gameOver() {
   game.status = "gameover";
 }
-
-var engHolost = new Audio(); // Создаём новый элемент Audio
-engHolost.src = 'sound/int-uaz-idle.wav'; // Указываем путь к звуку "клика"
-engHolost.volume = 0.1;
-engHolost.loop = true;
 
 var delta = 0;
 function loop(){
@@ -767,6 +780,8 @@ function init(event){
 
   distanceLabel = document.getElementById("distance");
   messageStart = document.getElementById("messageStart");
+  soundButton = document.getElementById("soundButton");
+  world = document.getElementById("world");
   /*energyBar = document.getElementById("energyBar");
   replayMessage = document.getElementById("replayMessage");
   fieldLevel = document.getElementById("levelValue");
@@ -784,9 +799,10 @@ function init(event){
   createCar();
   //soundEngStart();
 
+  soundButton.addEventListener('click', soundMute, false);
   messageStart.addEventListener('click', resetGame, false);
   document.addEventListener('mousemove', handleMouseMove, false);
-  document.addEventListener('click', playGudok, false);
+  world.addEventListener('click', playGudok, false);
 
   loop();
 }

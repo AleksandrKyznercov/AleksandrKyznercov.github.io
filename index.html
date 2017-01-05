@@ -118,13 +118,35 @@
 				font-size: 12px;
 			/*	text-align: center;*/
 			}
+			.soundButton {
+				/*background: lightblue;*/
+				border: 4px solid black;
+				font-family: 'Press Start 2P', cursive;
+				position: absolute;
+				top: 6px;
+				right: 20px;
+				width: 60px;
+				height: 60px;
+				border-radius: 34px;
+				font-size: 12px;
+				line-height: 5;
+  	 	  text-align: center;
+			  cursor: pointer;
+			}
+			.soundButton:hover {
+				border: 4px solid lime;
+
+			}
 		</style>
 	</head>
 	<body>
 
-    <div id="world" class="world"><div id="messageStart" class="messageStart">START</div></div>
-		<h1 class="text1">UAZik!<span class="text2"> na flange...</span></h1>
+    <div id="world" class="world">
+			<div id="messageStart" class="messageStart">START</div>
 
+	  </div>
+		<h1 class="text1">UAZik!<span class="text2"> na flange...</span></h1>
+		<div id="soundButton" class="soundButton" value="Вкл">Вкл</div>
 		<div id="distance_text" class="distance_text">Уазик не <br>горел уже:</div>
 		<div id="distance" class="distance"></div>
 
