@@ -781,6 +781,7 @@ function init(event){
   distanceLabel = document.getElementById("distance");
   messageStart = document.getElementById("messageStart");
   soundButton = document.getElementById("soundButton");
+  soundButton.value = "Вкл";
   world = document.getElementById("world");
   /*energyBar = document.getElementById("energyBar");
   replayMessage = document.getElementById("replayMessage");
