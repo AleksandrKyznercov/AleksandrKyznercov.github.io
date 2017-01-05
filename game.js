@@ -166,9 +166,15 @@ function createScene() {
   //Туман
   scene.fog = new THREE.Fog(0xf7d9aa, 10,10000);
 
-  camera.position.x = 0;
+  camera.rotation.x = -.2;
+  camera.rotation.y = 2.2;
+  camera.position.x = 350;
+  camera.position.y = -100;
+  camera.position.z = -950;
+  /*camera.position.x = 0;
   camera.position.z = 200;
-  camera.position.y = 100;
+  camera.position.y = 100;*/
+
 
   renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
   renderer.setSize(WIDTH, HEIGHT);
@@ -727,23 +733,28 @@ function gameOver() {
 
 var delta = 0;
 function loop(){
+  /*camera_x.innerHTML = "camera.rotation.x = " + camera.position.x;
+  camera_y.innerHTML = "camera.rotation.y = " + camera.position.y;
+  camera_z.innerHTML = "camera.rotation.z = " + camera.position.z;*/
 if (game.status == "starting"){
   if (soundEngStart.currentTime){
     engHolost.play();
   }
 }
 if (game.status == "playing") {
+  updateCamera();
   updateCar();
   if (game.speed<game.maxSpeed){
     game.speed += 0.05;
   }
+
   console.log('inUse '+WhiteLinesHolder.ennemiesInUse.length);
     if ((delta%-20) == 0){
       WhiteLinesHolder.spawnWhiteLines();
     }
     WhiteLinesHolder.rotateWhiteLines();
     game.distance++;
-    distanceLabel.innerHTML = game.distance;
+    distanceLabel.innerHTML = game.distance + " m";
   }
   renderer.render(scene, camera);
   requestAnimationFrame(loop);
@@ -751,6 +762,35 @@ if (game.status == "playing") {
 
 }
 
+function updateCamera(){
+  if (camera.rotation.x.toFixed(4) != 0){
+    camera.rotation.x += .02;// -.2
+  }else{
+    camera.rotation.x = 0;
+  }
+  if (camera.rotation.y.toFixed(4) != 0){// 2.2
+    camera.rotation.y -= .1;//0.5
+  }else{
+    camera.rotation.y = 0;
+  }
+  if (camera.position.x.toFixed(4) != 0){// 350
+    camera.position.x -= 350/12;//10
+  }else{
+      camera.position.x = 0;
+  }
+  if (camera.position.y.toFixed(4) != 100){// -100
+    camera.position.y += 20;//20
+  }
+  if (camera.position.z.toFixed(2) < 200){// -950
+    camera.position.z += (950 + 200)/20;//30
+  }
+  /*camera.position.x = 350;
+  camera.position.y = -100;
+  camera.position.z = -950;
+  camera.position.x = 0;
+  camera.position.z = 200;
+  camera.position.y = 100;*/
+}
 
 function updateCar(){
   var targetY = normalize(mousePos.y,-1,0.5,-400, -750);
@@ -783,6 +823,9 @@ function init(event){
   soundButton = document.getElementById("soundButton");
   soundButton.value = "Вкл";
   world = document.getElementById("world");
+  camera_x = document.getElementById("camera_x");
+  camera_y = document.getElementById("camera_y");
+  camera_z = document.getElementById("camera_z");
   /*energyBar = document.getElementById("energyBar");
   replayMessage = document.getElementById("replayMessage");
   fieldLevel = document.getElementById("levelValue");
