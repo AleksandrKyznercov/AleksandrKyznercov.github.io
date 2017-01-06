@@ -154,6 +154,21 @@
 			#messagePause {
 				display: none;
 			}
+			.speedChanger {
+				position: absolute;
+				top: 4px;
+				left: 600px;
+				width: 200px;
+				font-size: 16px;
+			}
+			.speed{
+				font-family: 'Press Start 2P', cursive;/*Zeppelin32*/
+				position: absolute;
+				top: 20px;
+				left: 600px;
+				width: 300px;
+				font-size: 16px;
+			}
 		</style>
 	</head>
 	<body>
@@ -161,6 +176,8 @@
     <div id="world" class="world">
 			<div id="messageStart" class="message">START</div>
 			<div id="messagePause" class="message">PAUSE</div>
+			<div id="speed" class="speed">50</div>
+			<input type="range" min="50" max="200" step="1" value="50" id="speedChanger" class="speedChanger">
 	  </div>
 		<h1 class="text1">UAZik!<span class="text2"> na flange...</span></h1>
 		<div id="soundButton" class="soundButton" value="Вкл">Вкл</div>

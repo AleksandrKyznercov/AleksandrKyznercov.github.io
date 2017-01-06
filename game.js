@@ -15,7 +15,7 @@ var Colors = {
 };
 
 // GAME VARIABLES
-var game = {speed:100,
+var game = {speed:50,
         initSpeed:.00035,
         baseSpeed:.00035,
         targetBaseSpeed:.00035,
@@ -34,7 +34,7 @@ var game = {speed:100,
         levelLastUpdate:0,
         distanceForLevelUpdate:1000,
 
-        planeDefaultHeight:100,
+        planeDefaultHeight:50,
         planeAmpHeight:80,
         planeAmpWidth:75,
         planeMoveSensivity:0.005,
@@ -72,7 +72,7 @@ var game = {speed:100,
         ennemyValue:10,
         ennemiesSpeed:.6,
         ennemyLastSpawn:0,
-        distanceForEnnemiesSpawn:50,
+        distanceForEnnemiesSpawn:20,
 
         status : "starting",
        };
@@ -190,7 +190,7 @@ function startGame(){
 
 function resetGame(){
   messageStart.style.display = "none";
-  game.speed=100;
+  game.speed=50;
   game.initSpeed=.00035;
   game.baseSpeed=.00035;
   game.targetBaseSpeed=.00035;
@@ -198,7 +198,7 @@ function resetGame(){
   game.incrementSpeedByLevel=.000005;
   game.distanceForSpeedUpdate=100;
   game.speedLastUpdate=0;
-  game.maxSpeed=100;
+  game.maxSpeed=200;
 
   game.distance=0;
   game.ratioSpeedDistance=50;
@@ -525,15 +525,6 @@ Road = function(){
   this.mesh.receiveShadow = true;
 }
 
-/*WhiteLine = function(){
-  var geom = new THREE.BoxGeometry(40,12,200,1,1);
-  var mat = new THREE.MeshPhongMaterial({
-    color:Colors.white
-  });
-  this.mesh = new THREE.Mesh(geom, mat);
-  this.mesh.receiveShadow = true;
-}*/
-
 Cloud = function(){
   this.mesh = new THREE.Object3D();
   this.mesh.name = "cloud";
@@ -736,30 +727,31 @@ function loop(){
   /*camera_x.innerHTML = "camera.rotation.x = " + camera.position.x;
   camera_y.innerHTML = "camera.rotation.y = " + camera.position.y;
   camera_z.innerHTML = "camera.rotation.z = " + camera.position.z;*/
-if (game.status == "starting"){
-  if (soundEngStart.currentTime){
-    engHolost.play();
+  if (game.status == "starting"){
+    if (soundEngStart.currentTime){
+      engHolost.play();
+    }
   }
-}
-if (game.status == "playing") {
-  updateCamera();
-  updateCar();
-  if (game.speed<game.maxSpeed){
-    game.speed += 0.05;
-  }
-
-  console.log('inUse '+WhiteLinesHolder.ennemiesInUse.length);
-    if ((delta%-20 ) == 0){
+  if (game.status == "playing") {
+    updateCamera();
+    updateCar();
+    if (game.speed<game.maxSpeed){
+      game.speed += 0.1;
+      speedChanger.value = Math.floor(game.speed);
+    }
+    console.log('inUse '+WhiteLinesHolder.ennemiesInUse.length);
+    if (Math.floor(game.distance)%game.distanceForEnnemiesSpawn == 0 && Math.floor(game.distance) > game.ennemyLastSpawn){
+      game.ennemyLastSpawn = game.distance;
       WhiteLinesHolder.spawnWhiteLines();
     }
     WhiteLinesHolder.rotateWhiteLines();
     game.distance++;
-    distanceLabel.innerHTML = game.distance + " m";
+    distanceLabel.innerHTML = (game.distance/1000).toFixed(2) + " Км";
+    speedLabel.innerHTML = "Уазик алгует со скоростью: " + Math.floor(game.speed) + " Км/ч";
   }
   renderer.render(scene, camera);
   requestAnimationFrame(loop);
   delta++;
-
 }
 
 function updateCamera(){
@@ -791,6 +783,9 @@ function updateCamera(){
   camera.position.z = 200;
   camera.position.y = 100;*/
 }
+function changeSpeed(){
+  game.speed = Math.floor(speedChanger.value);
+}
 
 function updateCar(){
   var targetY = normalize(mousePos.y,-1,0.5,-400, -750);
@@ -808,14 +803,16 @@ function updateCar(){
 }
 
 function pauseGame(event){
-  if (event.charCode == 32 && game.status != "pause"){
-    game.status = "pause";
-    messagePause.style.display = "block";
-  }else {
-    game.status = "playing";
-    messagePause.style.display = "none";
+  if (game.status != "starting"){
+    if (event.charCode == 32 && game.status != "pause"){
+      game.status = "pause";
+      messagePause.style.display = "block";
+    }else {
+      game.status = "playing";
+      messagePause.style.display = "none";
+    }
+    soundMute();
   }
-  soundMute();
 }
 
 function normalize(v,vmin,vmax,tmin, tmax){
@@ -830,9 +827,11 @@ function normalize(v,vmin,vmax,tmin, tmax){
 function init(event){
 
   distanceLabel = document.getElementById("distance");
+  speedLabel = document.getElementById("speed");
   messageStart = document.getElementById("messageStart");
   messagePause = document.getElementById("messagePause");
   soundButton = document.getElementById("soundButton");
+  speedChanger = document.getElementById("speedChanger");
   soundButton.value = "Вкл";
   world = document.getElementById("world");
   camera_x = document.getElementById("camera_x");
@@ -853,8 +852,8 @@ function init(event){
   createGround();
   createWhiteLine();
   createCar();
-  //soundEngStart();
-
+  //soundEngStart();oninput
+  speedChanger.addEventListener('click', changeSpeed, false);
   soundButton.addEventListener('click', soundMute, false);
   messageStart.addEventListener('click', resetGame, false);
   messagePause.addEventListener('click', pauseGame, false);
