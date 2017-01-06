@@ -100,7 +100,7 @@
 				font-size: 16px;
 			/*	text-align: center;*/
 			}
-			.messageStart {
+			.message {
 				font-family: 'Press Start 2P', cursive;
 				position: absolute;
 				bottom: 50vh;
@@ -110,6 +110,12 @@
 				text-transform: uppercase;
 				font-size: 28px;
 				cursor: pointer;
+			}
+			.message:hover {
+				-moz-text-shadow:0 0 15px green;
+				-webkit-text-shadow:0 0 15px green;
+				text-shadow:0 0 15px green;
+				color: white;
 			}
 			.distance_text {
 				font-family: 'Press Start 2P', cursive;
@@ -145,13 +151,16 @@
 				font-size: 16px;
 			/*	text-align: center;*/
 			}
+			#messagePause {
+				display: none;
+			}
 		</style>
 	</head>
 	<body>
 
     <div id="world" class="world">
-			<div id="messageStart" class="messageStart">START</div>
-
+			<div id="messageStart" class="message">START</div>
+			<div id="messagePause" class="message">PAUSE</div>
 	  </div>
 		<h1 class="text1">UAZik!<span class="text2"> na flange...</span></h1>
 		<div id="soundButton" class="soundButton" value="Вкл">Вкл</div>

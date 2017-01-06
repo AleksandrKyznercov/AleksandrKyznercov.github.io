@@ -68,7 +68,7 @@ var game = {speed:100,
         coinLastSpawn:0,
         distanceForCoinsSpawn:100,
 
-        ennemyDistanceTolerance:10,
+        ennemyDistanceTolerance:100,
         ennemyValue:10,
         ennemiesSpeed:.6,
         ennemyLastSpawn:0,
@@ -185,6 +185,7 @@ function createScene() {
   window.addEventListener('resize', handleWindowResize, false);
 }
 function startGame(){
+
 }
 
 function resetGame(){
@@ -192,17 +193,17 @@ function resetGame(){
   game.speed=100;
   game.initSpeed=.00035;
   game.baseSpeed=.00035;
-          game.targetBaseSpeed=.00035;
-          game.incrementSpeedByTime=.0000025;
-          game.incrementSpeedByLevel=.000005;
-          game.distanceForSpeedUpdate=100;
-          game.speedLastUpdate=0;
-game.maxSpeed=100;
+  game.targetBaseSpeed=.00035;
+  game.incrementSpeedByTime=.0000025;
+  game.incrementSpeedByLevel=.000005;
+  game.distanceForSpeedUpdate=100;
+  game.speedLastUpdate=0;
+  game.maxSpeed=100;
 
-          game.distance=0;
-          game.ratioSpeedDistance=50;
-          game.energy=100;
-          game.ratioSpeedEnergy=3;
+  game.distance=0;
+  game.ratioSpeedDistance=50;
+  game.energy=100;
+  game.ratioSpeedEnergy=3;
 
           game.level=1;
           game.levelLastUpdate=0;
@@ -241,13 +242,12 @@ game.maxSpeed=100;
           game.coinsSpeed:.5;
           game.coinLastSpawn:0;
           game.distanceForCoinsSpawn:100;
+game.ennemyDistanceTolerance:10;
 
-          game.ennemyDistanceTolerance:10;
           game.ennemyValue:10;
           game.ennemiesSpeed:.6;
           game.ennemyLastSpawn:0;
           game.distanceForEnnemiesSpawn:50;*/
-
           game.status = "playing";
 
   distanceLabel.innerHTML = game.distance;
@@ -288,7 +288,6 @@ function createLights() {
   scene.add(hemisphereLight);
   scene.add(shadowLight);
 }
-
 
 var AirPlane = function(){
 	this.mesh = new THREE.Object3D();
@@ -624,31 +623,32 @@ WhiteLinesHolder.prototype.rotateWhiteLines = function(){
       ennemiesPool.unshift(this.ennemiesInUse.splice(i,1)[0]);
       this.mesh.remove(ennemy.mesh);
       i--;
-    }/*
-    ennemy.angle += game.speed*deltaTime*game.ennemiesSpeed;
+    }
+    /*ennemy.angle += game.speed*deltaTime*game.ennemiesSpeed;
 
     if (ennemy.angle > Math.PI*2) ennemy.angle -= Math.PI*2;
 
     ennemy.mesh.position.y = -game.seaRadius + Math.sin(ennemy.angle)*ennemy.distance;
     ennemy.mesh.position.x = Math.cos(ennemy.angle)*ennemy.distance;
     ennemy.mesh.rotation.z += Math.random()*.1;
-    ennemy.mesh.rotation.y += Math.random()*.1;
+    ennemy.mesh.rotation.y += Math.random()*.1;*/
 
     //var globalEnnemyPosition =  ennemy.mesh.localToWorld(new THREE.Vector3());
-    var diffPos = airplane.mesh.position.clone().sub(ennemy.mesh.position.clone());
+    // РАБОТАЕТ
+    /*var diffPos = car.mesh.position.clone().sub(ennemy.mesh.position.clone());
     var d = diffPos.length();
+    //console.log("d = "+d + "Toler = " + game.ennemyDistanceTolerance);
     if (d<game.ennemyDistanceTolerance){
-      particlesHolder.spawnParticles(ennemy.mesh.position.clone(), 15, Colors.red, 3);
+      //particlesHolder.spawnParticles(ennemy.mesh.position.clone(), 15, Colors.red, 3);
 
       ennemiesPool.unshift(this.ennemiesInUse.splice(i,1)[0]);
       this.mesh.remove(ennemy.mesh);
-      game.planeCollisionSpeedX = 100 * diffPos.x / d;
-      game.planeCollisionSpeedY = 100 * diffPos.y / d;
-      ambientLight.intensity = 2;
 
-      removeEnergy();
+      gameOver();
       i--;
-    }else if (ennemy.angle > Math.PI){
+    }*/
+
+    /*else if (ennemy.angle > Math.PI){
       ennemiesPool.unshift(this.ennemiesInUse.splice(i,1)[0]);
       this.mesh.remove(ennemy.mesh);
       i--;
@@ -749,7 +749,7 @@ if (game.status == "playing") {
   }
 
   console.log('inUse '+WhiteLinesHolder.ennemiesInUse.length);
-    if ((delta%-20) == 0){
+    if ((delta%-20 ) == 0){
       WhiteLinesHolder.spawnWhiteLines();
     }
     WhiteLinesHolder.rotateWhiteLines();
@@ -807,6 +807,17 @@ function updateCar(){
   targetY_global = targetY;
 }
 
+function pauseGame(event){
+  if (event.charCode == 32 && game.status != "pause"){
+    game.status = "pause";
+    messagePause.style.display = "block";
+  }else {
+    game.status = "playing";
+    messagePause.style.display = "none";
+  }
+  soundMute();
+}
+
 function normalize(v,vmin,vmax,tmin, tmax){
   var nv = Math.max(Math.min(v,vmax), vmin);
   var dv = vmax-vmin;
@@ -820,6 +831,7 @@ function init(event){
 
   distanceLabel = document.getElementById("distance");
   messageStart = document.getElementById("messageStart");
+  messagePause = document.getElementById("messagePause");
   soundButton = document.getElementById("soundButton");
   soundButton.value = "Вкл";
   world = document.getElementById("world");
@@ -845,8 +857,10 @@ function init(event){
 
   soundButton.addEventListener('click', soundMute, false);
   messageStart.addEventListener('click', resetGame, false);
+  messagePause.addEventListener('click', pauseGame, false);
   document.addEventListener('mousemove', handleMouseMove, false);
   world.addEventListener('click', playGudok, false);
+  document.addEventListener('keypress', pauseGame, false);
 
   loop();
 }
