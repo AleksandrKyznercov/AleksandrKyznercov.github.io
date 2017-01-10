@@ -23,7 +23,7 @@ var game = {speed:50,
         incrementSpeedByLevel:.000005,
         distanceForSpeedUpdate:100,
         speedLastUpdate:0,
-        maxSpeed:200,
+        maxSpeed:100,
 
         distance:0,
         ratioSpeedDistance:50,
@@ -68,11 +68,16 @@ var game = {speed:50,
         coinLastSpawn:0,
         distanceForCoinsSpawn:100,
 
-        ennemyDistanceTolerance:100,
+        lineDistanceTolerance:100,
         ennemyValue:10,
         ennemiesSpeed:.6,
-        ennemyLastSpawn:0,
-        distanceForEnnemiesSpawn:20,
+        lineLastSpawn:0,
+        distanceForLinesSpawn:40,
+
+        mineDistanceTolerance:100,
+        mineLastSpawn:0,
+        distanceForMineSpawn:200,
+
 
         status : "starting",
        };
@@ -80,7 +85,7 @@ var game = {speed:50,
 var deltaTime = 0;
 var newTime = new Date().getTime();
 var oldTime = new Date().getTime();
-var ennemiesPool = [];
+var whiteLinesPool = [];
 var targetY_global;
 var targetX_global;
 // THREEJS RELATED VARIABLES
@@ -116,6 +121,15 @@ function playGudok() {
   if ((game.status == "playing") && (soundButton.value == "Вкл")){
     var audio = new Audio(); // Создаём новый элемент Audio
     audio.src = 'sound/int-uaz-horn.wav'; // Указываем путь к звуку "клика"
+    audio.volume = 0.1;
+    audio.autoplay = true;
+  }
+}
+
+function playMineExplosion() {
+  if (soundButton.value == "Вкл"){
+    var audio = new Audio(); // Создаём новый элемент Audio
+    audio.src = 'sound/mine.mp3'; // Указываем путь к звуку "клика"
     audio.volume = 0.1;
     audio.autoplay = true;
   }
@@ -185,11 +199,12 @@ function createScene() {
   window.addEventListener('resize', handleWindowResize, false);
 }
 function startGame(){
-
+ messageStart.style.display = "block";
 }
 
 function resetGame(){
   messageStart.style.display = "none";
+  messageGameOver.style.display = "none";
   game.speed=50;
   game.initSpeed=.00035;
   game.baseSpeed=.00035;
@@ -198,16 +213,16 @@ function resetGame(){
   game.incrementSpeedByLevel=.000005;
   game.distanceForSpeedUpdate=100;
   game.speedLastUpdate=0;
-  game.maxSpeed=200;
+  game.maxSpeed=100;
 
   game.distance=0;
   game.ratioSpeedDistance=50;
   game.energy=100;
   game.ratioSpeedEnergy=3;
 
-          game.level=1;
-          game.levelLastUpdate=0;
-          game.distanceForLevelUpdate=1000;
+  game.level=1;
+  game.levelLastUpdate=0;
+  game.distanceForLevelUpdate=1000;
 
           /*game.planeDefaultHeight:100;
           game.planeAmpHeight:80;
@@ -248,7 +263,9 @@ game.ennemyDistanceTolerance:10;
           game.ennemiesSpeed:.6;
           game.ennemyLastSpawn:0;
           game.distanceForEnnemiesSpawn:50;*/
-          game.status = "playing";
+          game.lineLastSpawn = 0;
+          game.mineLastSpawn = 0;
+  game.status = "playing";
 
   distanceLabel.innerHTML = game.distance;
   soundEngineLow.play();
@@ -508,7 +525,7 @@ Sea = function(){
 }
 
 Ground = function(){
-  var geom = new THREE.BoxGeometry(10000,10,10000,1,1);
+  var geom = new THREE.BoxGeometry(10000,8,15000,1,1);
   var mat = new THREE.MeshPhongMaterial({
     color:Colors.pesoch
   });
@@ -517,7 +534,7 @@ Ground = function(){
 }
 
 Road = function(){
-  var geom = new THREE.BoxGeometry(900,11,10000,1,1);
+  var geom = new THREE.BoxGeometry(900,9,15000,1,1);
   var mat = new THREE.MeshStandardMaterial({
     color:Colors.brown
   });
@@ -568,8 +585,108 @@ Text = function(){
     this.mesh.castShadow = true;
 }
 
+Mine = function(){
+  this.mesh = new THREE.Object3D();
+  this.mesh.name = "Mine";
+
+  var geom = new THREE.CylinderGeometry(15,15,6,40,100);
+  var mat = new THREE.MeshPhongMaterial({color:0x384521, shading:THREE.FlatShading});
+  var mineBottomPart = new THREE.Mesh(geom, mat);
+  mineBottomPart.castShadow = true;
+  mineBottomPart.receiveShadow = true;
+  this.mesh.add(mineBottomPart);
+
+  var geom = new THREE.CylinderGeometry(8,10,2,40,100);
+  var mat = new THREE.MeshPhongMaterial({color:0x384521, shading:THREE.FlatShading});
+  var mineTopPart = new THREE.Mesh(geom, mat);
+  mineTopPart.position.set(0,4,0);
+  mineTopPart.castShadow = true;
+  mineTopPart.receiveShadow = true;
+  this.mesh.add(mineTopPart);
+
+  var geom = new THREE.CylinderGeometry(5,5,2,40,100);
+  var mat = new THREE.MeshPhongMaterial({color:0x1c1c1c, shading:THREE.FlatShading});
+  var mineFusePart = new THREE.Mesh(geom, mat);
+  mineFusePart.position.set(0,5,0);
+  mineFusePart.castShadow = true;
+  mineFusePart.receiveShadow = true;
+  this.mesh.add(mineFusePart);
+}
+
+MinesHolder = function(nMines){
+  this.mesh = new THREE.Object3D();
+  this.minesInUse = [];
+  this.minesPool = [];
+  for (var i=0; i<nMines; i++){
+    var mine = new Mine();
+    this.minesPool.push(mine);
+  }
+}
+
+MinesHolder.prototype.spawnMines = function(){
+    var mine;
+    if (this.minesPool.length) {
+      mine = this.minesPool.pop();
+    }else{
+      mine = new Mine();
+    }
+
+    mine.mesh.position.y = -192;
+    mine.mesh.position.x = Math.random()*(430+430)-430;
+    mine.mesh.position.z = -10000;
+    mine.mesh.scale.set(1.5,1.5,1.5);
+    this.mesh.add(mine.mesh);
+    this.minesInUse.push(mine);
+}
+
+MinesHolder.prototype.rotateMines = function(){
+  for (var i=0; i<this.minesInUse.length; i++){
+    var mine = this.minesInUse[i];
+
+      mine.mesh.position.z += game.speed;
+
+    //console.log(this.ennemiesInUse.length);
+    if (mine.mesh.position.z > 0) {
+      //this.ennemiesInUse.splice(i,1)[0];
+      this.minesPool.unshift(this.minesInUse.splice(i,1)[0]);
+      this.mesh.remove(mine.mesh);
+      i--;
+    }
+    /*ennemy.angle += game.speed*deltaTime*game.ennemiesSpeed;
+
+    if (ennemy.angle > Math.PI*2) ennemy.angle -= Math.PI*2;
+
+    ennemy.mesh.position.y = -game.seaRadius + Math.sin(ennemy.angle)*ennemy.distance;
+    ennemy.mesh.position.x = Math.cos(ennemy.angle)*ennemy.distance;
+    ennemy.mesh.rotation.z += Math.random()*.1;
+    ennemy.mesh.rotation.y += Math.random()*.1;*/
+
+    //var globalEnnemyPosition =  ennemy.mesh.localToWorld(new THREE.Vector3());
+    // РАБОТАЕТ
+    var diffPos = car.mesh.position.clone().sub(mine.mesh.position.clone());
+    var d = diffPos.length();
+    //console.log("d = "+d + "Toler = " + game.ennemyDistanceTolerance);
+    if (d<game.mineDistanceTolerance){
+      //particlesHolder.spawnParticles(ennemy.mesh.position.clone(), 15, Colors.red, 3);
+
+      this.minesPool.unshift(this.minesInUse.splice(i,1)[0]);
+      this.mesh.remove(mine.mesh);
+
+      gameOver();
+      playMineExplosion();
+      i--;
+    }
+
+    /*else if (ennemy.angle > Math.PI){
+      ennemiesPool.unshift(this.ennemiesInUse.splice(i,1)[0]);
+      this.mesh.remove(ennemy.mesh);
+      i--;
+    }*/
+  }
+}
+
 WhiteLine = function(){
-  var geom = new THREE.BoxGeometry(40,12,200,1,1);
+  var geom = new THREE.BoxGeometry(40,10,200,1,1);
   var mat = new THREE.MeshPhongMaterial({
     color:Colors.white
   });
@@ -581,38 +698,36 @@ WhiteLine = function(){
 
 WhiteLinesHolder = function (){
   this.mesh = new THREE.Object3D();
-  this.ennemiesInUse = [];
+  this.whiteLinesInUse = [];
 }
 
 WhiteLinesHolder.prototype.spawnWhiteLines = function(){
 
   //for (var i=0; i<10000; i+=800){
-    var ennemy;
-    console.log('Pool '+ennemiesPool.length);
-    if (ennemiesPool.length) {
-      ennemy = ennemiesPool.pop();
+    var whiteLine;
+    if (whiteLinesPool.length) {
+      whiteLine = whiteLinesPool.pop();
     }else{
-      ennemy = new WhiteLine();
+      whiteLine = new WhiteLine();
     }
-    ennemy.mesh.position.y = -200;
-    ennemy.mesh.position.z = -10000;
+    whiteLine.mesh.position.y = -200;
+    whiteLine.mesh.position.z = -10000;
 
-    this.mesh.add(ennemy.mesh);
-    this.ennemiesInUse.push(ennemy);
+    this.mesh.add(whiteLine.mesh);
+    this.whiteLinesInUse.push(whiteLine);
   //}
 }
 
 WhiteLinesHolder.prototype.rotateWhiteLines = function(){
-  for (var i=0; i<this.ennemiesInUse.length; i++){
-    var ennemy = this.ennemiesInUse[i];
-
-      ennemy.mesh.position.z += game.speed;
+  for (var i=0; i<this.whiteLinesInUse.length; i++){
+    var whiteLine = this.whiteLinesInUse[i];
+      whiteLine.mesh.position.z += game.speed;
 
     //console.log(this.ennemiesInUse.length);
-    if (ennemy.mesh.position.z > 0) {
+    if (whiteLine.mesh.position.z > 0) {
       //this.ennemiesInUse.splice(i,1)[0];
-      ennemiesPool.unshift(this.ennemiesInUse.splice(i,1)[0]);
-      this.mesh.remove(ennemy.mesh);
+      whiteLinesPool.unshift(this.whiteLinesInUse.splice(i,1)[0]);
+      this.mesh.remove(whiteLine.mesh);
       i--;
     }
     /*ennemy.angle += game.speed*deltaTime*game.ennemiesSpeed;
@@ -676,15 +791,16 @@ function createRoad(){
   //road.mesh.scale.set(.25,.25,.25);
   road.mesh.position.y = -200;
   road.mesh.position.z = -5000;
+
   scene.add(road.mesh);
 }
 
 function createWhiteLine(){
-  for (var i = 0; i < 10000; i += 800){
-    var ennemy = new WhiteLine();
-    ennemy.mesh.position.y = -200;
-    ennemy.mesh.position.z = -i;
-    ennemiesPool.push(ennemy);
+  for (var i = 0; i < 1; i += 1){
+    var whiteLine = new WhiteLine();
+    whiteLine.mesh.position.y = -200;
+    //whiteLine.mesh.position.z = -i;
+    whiteLinesPool.push(whiteLine);
   }
   WhiteLinesHolder = new WhiteLinesHolder();
   scene.add(WhiteLinesHolder.mesh)
@@ -696,6 +812,29 @@ function createCar(){
   car.mesh.position.y = -135//100 при 1.25
   car.mesh.position.z = -600;
   scene.add(car.mesh);
+}
+
+//Препядствия
+
+function createMine(){
+  /*mine = new Mine();
+  mine.mesh.position.y = -192;
+  mine.mesh.position.x =
+  mine.mesh.position.z = -550;
+  scene.add(mine.mesh);*/
+  MinesHolder = new MinesHolder(1);
+  scene.add(MinesHolder.mesh)
+  /*
+  for (var i = 0; i < 10000; i += 800){
+    mine = new Mine();
+    mine.mesh.position.y = -192;
+    mine.mesh.position.x = Math.random()*(430+430)-430;
+    mine.mesh.position.z = -550;
+    minesPool.push(mine);
+  }
+  MinesHolder = new MinesHolder();
+  scene.add(MinesHolder.mesh)
+*/
 }
 
 function createPlane(){
@@ -720,13 +859,17 @@ function createSky(){
 
 function gameOver() {
   game.status = "gameover";
+  soundEngineLow.pause();
+  messageGameOver.style.display = "block"
 }
 
 var delta = 0;
 function loop(){
-  /*camera_x.innerHTML = "camera.rotation.x = " + camera.position.x;
-  camera_y.innerHTML = "camera.rotation.y = " + camera.position.y;
-  camera_z.innerHTML = "camera.rotation.z = " + camera.position.z;*/
+if (game.status != "pause"){
+  newTime = new Date().getTime();
+  deltaTime = newTime-oldTime;
+  oldTime = newTime;
+
   if (game.status == "starting"){
     if (soundEngStart.currentTime){
       engHolost.play();
@@ -735,23 +878,44 @@ function loop(){
   if (game.status == "playing") {
     updateCamera();
     updateCar();
+
     if (game.speed<game.maxSpeed){
-      game.speed += 0.1;
+      game.speed += 0.01;
       speedChanger.value = Math.floor(game.speed);
     }
-    console.log('inUse '+WhiteLinesHolder.ennemiesInUse.length);
-    if (Math.floor(game.distance)%game.distanceForEnnemiesSpawn == 0 && Math.floor(game.distance) > game.ennemyLastSpawn){
-      game.ennemyLastSpawn = game.distance;
+
+
+    if (Math.floor(game.distance)%game.distanceForLinesSpawn == 0 && Math.floor(game.distance) > game.lineLastSpawn){
+      console.log('inUse Lines'+WhiteLinesHolder.whiteLinesInUse.length);
+      game.lineLastSpawn = Math.floor(game.distance);
       WhiteLinesHolder.spawnWhiteLines();
     }
-    WhiteLinesHolder.rotateWhiteLines();
-    game.distance++;
+
+    if (Math.floor(game.distance)%game.distanceForMineSpawn == 0 && Math.floor(game.distance) > game.mineLastSpawn){
+      game.mineLastSpawn = Math.floor(game.distance);
+      MinesHolder.spawnMines();
+    }
+
+
+    game.distance += game.speed/100;
+    //game.distance++;
     distanceLabel.innerHTML = (game.distance/1000).toFixed(2) + " Км";
     speedLabel.innerHTML = "Уазик алгует со скоростью: " + Math.floor(game.speed) + " Км/ч";
   }
+  if (game.status == "gameover") {
+    game.speed *= .98;
+    car.mesh.rotation.y = car.mesh.rotation.y*0.975;
+    car.mesh.rotation.z = car.mesh.rotation.z*0.975;
+    //car.mesh.material.color.set(Color.red);
+
+  }
+  WhiteLinesHolder.rotateWhiteLines();
+  MinesHolder.rotateMines();
+}
   renderer.render(scene, camera);
   requestAnimationFrame(loop);
   delta++;
+
 }
 
 function updateCamera(){
@@ -783,6 +947,7 @@ function updateCamera(){
   camera.position.z = 200;
   camera.position.y = 100;*/
 }
+
 function changeSpeed(){
   game.speed = Math.floor(speedChanger.value);
 }
@@ -830,6 +995,7 @@ function init(event){
   speedLabel = document.getElementById("speed");
   messageStart = document.getElementById("messageStart");
   messagePause = document.getElementById("messagePause");
+  messageGameOver = document.getElementById("messageGameOver");
   soundButton = document.getElementById("soundButton");
   speedChanger = document.getElementById("speedChanger");
   soundButton.value = "Вкл";
@@ -848,14 +1014,19 @@ function init(event){
 
   createLights();
   //createText();
+  startGame();
   createRoad();
   createGround();
   createWhiteLine();
   createCar();
+  //car.mesh.material.emissive.setHex( 0xff0000 );
+  createMine();
+  //cuzov.mesh.material.color.setHex( 0xff0000 );
   //soundEngStart();oninput
   speedChanger.addEventListener('click', changeSpeed, false);
   soundButton.addEventListener('click', soundMute, false);
   messageStart.addEventListener('click', resetGame, false);
+  messageGameOver.addEventListener('click', resetGame, false);
   messagePause.addEventListener('click', pauseGame, false);
   document.addEventListener('mousemove', handleMouseMove, false);
   world.addEventListener('click', playGudok, false);
