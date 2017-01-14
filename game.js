@@ -74,6 +74,9 @@ var game = {speed:50,
         lineLastSpawn:0,
         distanceForLinesSpawn:40,
 
+        distanceForTreesSpawn:15,
+        treeLastSpawn:0,
+
         mineDistanceTolerance:100,
         mineLastSpawn:0,
         distanceForMineSpawn:200,
@@ -304,13 +307,6 @@ function createLights() {
   scene.add(shadowLight);
 }
 
-function createCarHeadlight() {
-
-  /*lightHelper1 = new THREE.SpotLightHelper( leftHeadlight );
-  lightHelper2 = new THREE.SpotLightHelper( rightHeadlight );
-  scene.add( lightHelper1 );
-  scene.add( lightHelper2 );*/
-}
 
 function setDay() {
   if (game.day == "night") {
@@ -318,6 +314,7 @@ function setDay() {
     //$('.world').animate({background : "linear-gradient(#e4e0ba, #f7d9aa)"});
     world.style.color = "black";
     world.style.background = "linear-gradient(#e4e0ba, #f7d9aa)";
+    soundButton.style.border = "4px solid black";
     game.day = "day";
   }else if (game.day == "day"){
     scene.fog = new THREE.Fog(0x000000, 10,10000);
@@ -660,44 +657,121 @@ MinesHolder.prototype.spawnMines = function(){
 MinesHolder.prototype.rotateMines = function(){
   for (var i=0; i<this.minesInUse.length; i++){
     var mine = this.minesInUse[i];
-
       mine.mesh.position.z += game.speed;
-
-    //console.log(this.ennemiesInUse.length);
     if (mine.mesh.position.z > 0) {
       //this.ennemiesInUse.splice(i,1)[0];
       this.minesPool.unshift(this.minesInUse.splice(i,1)[0]);
       this.mesh.remove(mine.mesh);
       i--;
     }
-    /*ennemy.angle += game.speed*deltaTime*game.ennemiesSpeed;
-
-    if (ennemy.angle > Math.PI*2) ennemy.angle -= Math.PI*2;
-
-    ennemy.mesh.position.y = -game.seaRadius + Math.sin(ennemy.angle)*ennemy.distance;
-    ennemy.mesh.position.x = Math.cos(ennemy.angle)*ennemy.distance;
-    ennemy.mesh.rotation.z += Math.random()*.1;
-    ennemy.mesh.rotation.y += Math.random()*.1;*/
-
-    //var globalEnnemyPosition =  ennemy.mesh.localToWorld(new THREE.Vector3());
     // РАБОТАЕТ
     var diffPos = car.mesh.position.clone().sub(mine.mesh.position.clone());
     var d = diffPos.length();
-    //console.log("d = "+d + "Toler = " + game.ennemyDistanceTolerance);
     if (d<game.mineDistanceTolerance){
-      //particlesHolder.spawnParticles(ennemy.mesh.position.clone(), 15, Colors.red, 3);
-
       this.minesPool.unshift(this.minesInUse.splice(i,1)[0]);
       this.mesh.remove(mine.mesh);
-
       gameOver();
       playMineExplosion();
       i--;
     }
+  }
+}
 
-    /*else if (ennemy.angle > Math.PI){
-      ennemiesPool.unshift(this.ennemiesInUse.splice(i,1)[0]);
-      this.mesh.remove(ennemy.mesh);
+Tree = function(){
+  this.mesh = new THREE.Object3D();
+  this.mesh.name = "Tree";
+
+  var geom = new THREE.CylinderGeometry(30,30,40,60,100);
+  var treeWoodenPart = new THREE.Mesh(geom, new THREE.MeshPhongMaterial({color:0x472500, shading:THREE.FlatShading}));
+  treeWoodenPart.castShadow = true;
+  treeWoodenPart.receiveShadow = true;
+  this.mesh.add(treeWoodenPart);
+
+  var geom = new THREE.CylinderGeometry(0,140,320,100,100);
+  var mat = new THREE.MeshPhongMaterial({color:Colors.green, shading:THREE.FlatShading});
+  var treeBottomPart = new THREE.Mesh(geom, new THREE.MeshPhongMaterial({color:Colors.green, shading:THREE.FlatShading}));
+  treeBottomPart.position.set(0,180,0);
+  treeBottomPart.castShadow = true;
+  treeBottomPart.receiveShadow = true;
+  this.mesh.add(treeBottomPart);
+
+  /*var geom = new THREE.CylinderGeometry(50,120,100,100,100);
+  var mat = new THREE.MeshPhongMaterial({color:Colors.green, shading:THREE.FlatShading});
+  var tree2Part = new THREE.Mesh(geom.clone(), mat);
+  //treeTopPart.scale.set(.5,.5,.5);
+  tree2Part.position.set(0,180,0);
+  tree2Part.castShadow = true;
+  tree2Part.receiveShadow = true;
+  this.mesh.add(tree2Part);
+
+  /*var geom = new THREE.CylinderGeometry(0,70,100,100,100);
+  var mat = new THREE.MeshPhongMaterial({color:Colors.green, shading:THREE.FlatShading});
+  var treeTopPart = new THREE.Mesh(geom.clone(), mat);
+  //treeTopPart.scale.set(.33,.33,.33);
+  treeTopPart.position.set(0,280,0);
+  treeTopPart.castShadow = true;
+  treeTopPart.receiveShadow = true;
+  this.mesh.add(treeTopPart);*/
+}
+
+TreesHolder = function(nTrees){
+  this.mesh = new THREE.Object3D();
+  this.treesInUse = [];
+  this.treesPool = [];
+  for (var i = 0; i < nTrees; i++) {
+    var tree = new Tree();
+    this.treesPool.push(tree);
+  }
+
+
+}
+
+TreesHolder.prototype.spawnTrees = function(){
+    var tree;
+    if (this.treesPool.length) {
+      tree = this.treesPool.pop();
+    }else{
+      tree = new Tree();
+    }
+    var scale = Math.random()*(1.4 - .8) + .8;
+    tree.mesh.scale.set(scale,scale,scale);
+    tree.mesh.position.y = -200 + 60*(scale - scale/2);
+    if ( Math.random()*(2-1)+1 > 1) {
+      tree.mesh.position.z = -10000;
+      tree.mesh.position.x = Math.random()*(-3000 - -530) + -530;
+    } else {
+      tree.mesh.position.z = -10000;
+      tree.mesh.position.x = Math.random()*(3000 - 530) + 530;
+    }
+    console.log(tree.mesh.position.x,tree.mesh.position.y,tree.mesh.position.z);
+    this.mesh.add(tree.mesh);
+    this.treesInUse.push(tree);
+}
+
+TreesHolder.prototype.rotateTrees = function(){
+  for (var i=0; i<this.treesInUse.length; i++){
+    var tree = this.treesInUse[i];
+      tree.mesh.position.z += game.speed;
+    if (tree.mesh.position.z > 0) {
+      if (tree.mesh.position.x > 0) {
+        tree.mesh.position.z = -10000;
+        tree.mesh.position.x = Math.random()*(-3000 - -530) + -530;
+      } else {
+        tree.mesh.position.z = -10000;
+        tree.mesh.position.x = Math.random()*(3000 - 530) + 530;
+      }
+      /*this.treesPool.unshift(this.treesInUse.splice(i,1)[0]);
+      this.mesh.remove(tree.mesh);
+      i--;*/
+    }
+    // РАБОТАЕТ
+    /*var diffPos = car.mesh.position.clone().sub(mine.mesh.position.clone());
+    var d = diffPos.length();
+    if (d<game.mineDistanceTolerance){
+      this.minesPool.unshift(this.minesInUse.splice(i,1)[0]);
+      this.mesh.remove(mine.mesh);
+      gameOver();
+      playMineExplosion();
       i--;
     }*/
   }
@@ -890,7 +964,7 @@ function createCar(){
 //Препядствия
 
 function createMine(){
-  MinesHolder = new MinesHolder(1);
+  MinesHolder = new MinesHolder();
   scene.add(MinesHolder.mesh)
 }
 
@@ -915,6 +989,10 @@ function createSky(){
   scene.add(sky.mesh);
 }
 
+function createTree(){
+  TreesHolder = new TreesHolder(18);
+  scene.add(TreesHolder.mesh)
+}
 
 function gameOver() {
   game.status = "gameover";
@@ -947,10 +1025,14 @@ function loop(){
       }
 
 
-      if (Math.floor(game.distance)%game.distanceForLinesSpawn == 0 && Math.floor(game.distance) > game.lineLastSpawn){
-        console.log('inUse Lines'+WhiteLinesHolder.whiteLinesInUse.length);
+      if (Math.floor(game.distance)%game.distanceForLinesSpawn == 0 && Math.floor(game.distance) > game.lineLastSpawn) {
         game.lineLastSpawn = Math.floor(game.distance);
         WhiteLinesHolder.spawnWhiteLines();
+      }
+
+      if (Math.floor(game.distance)%game.distanceForTreesSpawn == 0 && Math.floor(game.distance) > game.treeLastSpawn && (TreesHolder.treesPool.length > 0)){
+        game.treeLastSpawn = Math.floor(game.distance);
+        TreesHolder.spawnTrees();
       }
 
       if (Math.floor(game.distance)%game.distanceForMineSpawn == 0 && Math.floor(game.distance) > game.mineLastSpawn){
@@ -972,6 +1054,7 @@ function loop(){
 
     }
     updateDay();
+    TreesHolder.rotateTrees();
     WhiteLinesHolder.rotateWhiteLines();
     MinesHolder.rotateMines();
 }
@@ -1051,14 +1134,14 @@ function pauseGame(event){
     }
     soundMute();
   }
-  if ((event.charCode == 76 || event.charCode == 108) && (leftHeadlight.intensity > 0)) {
+  if (((event.charCode == 76 || event.charCode == 108) || (event.charCode == 1076 || event.charCode == 1044)) && (leftHeadlight.intensity > 0)) {
     leftHeadlight.intensity = 0;
     rightHeadlight.intensity = 0;
     rightBackHeadlight_mesh.material.emissive.setHex(0x000000);
     leftBackHeadlight_mesh.material.emissive.setHex(0x000000);
     backLeftHeadlight.intensity = 0;
     backRightHeadlight.intensity = 0;
-  }else if (event.charCode == 76 || event.charCode == 108) {
+  }else if ((event.charCode == 76 || event.charCode == 108) || (event.charCode == 1076 || event.charCode == 1044))  {
     leftHeadlight.intensity = 2;
     rightHeadlight.intensity = 2;
     rightBackHeadlight_mesh.material.emissive.setHex(Colors.red);
@@ -1066,6 +1149,16 @@ function pauseGame(event){
     backLeftHeadlight.intensity = 1;
     backRightHeadlight.intensity = 1;
   }
+  var keyCode;
+  if (window.event)
+	{
+		keyCode = window.event.keyCode;
+	}
+	else if (event)
+	{
+		keyCode = event.which;
+	}
+  // console.log(event.charCode, event.keyCode, event.width, keyCode);
 }
 
 function normalize(v,vmin,vmax,tmin, tmax){
@@ -1109,10 +1202,8 @@ function init(event){
   createGround();
   createWhiteLine();
   createCar();
-  createCarHeadlight();
-
-  //car.mesh.material.emissive.setHex( 0xff0000 );
   createMine();
+  createTree();
   //createUAZ_Ply();
   //cuzov.mesh.material.color.setHex( 0xff0000 );
   //soundEngStart();oninput
