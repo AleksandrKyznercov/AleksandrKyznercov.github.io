@@ -74,7 +74,7 @@ var game = {speed:50,
         lineLastSpawn:0,
         distanceForLinesSpawn:40,
 
-        distanceForTreesSpawn:15,
+        distanceForTreesSpawn:10,
         treeLastSpawn:0,
 
         mineDistanceTolerance:100,
@@ -677,20 +677,68 @@ MinesHolder.prototype.rotateMines = function(){
   }
 }
 
-Tree = function(){
+TreeBirch = function(){
   this.mesh = new THREE.Object3D();
-  this.mesh.name = "Tree";
+  this.mesh.name = "TreeBirch";
 
-  var geom = new THREE.CylinderGeometry(30,30,40,60,100);
+  var geom = new THREE.CylinderGeometry(3,3,8,10,10);
+  var treeWoodenPart = new THREE.Mesh(geom, new THREE.MeshPhongMaterial({color:0xfdf5e6, shading:THREE.FlatShading}));
+  treeWoodenPart.castShadow = true;
+  treeWoodenPart.receiveShadow = true;
+  this.mesh.add(treeWoodenPart);
+
+  var alphamap = new THREE.ImageUtils.loadTexture('images/bumpTreeMap.jpg');
+  alphamap.wrapS = THREE.RepeatWrapping;
+  alphamap.wrapT = THREE.RepeatWrapping;
+  alphamap.repeat.set( .2, .2 );
+  var geom = new THREE.CubeGeometry(18,28,18);
+  var treeBottomPart = new THREE.Mesh(geom, new THREE.MeshPhongMaterial({
+    color:Colors.green,/*0x90ee90*/
+    /*shading:THREE.FlatShading,
+    transparent:true,
+    alphaMap:alphamap,
+    alphaTest:0.5,
+    side: THREE.DoubleSide*/
+    shading:THREE.FlatShading
+  }));
+  treeBottomPart.position.set(0,18,0);
+  treeBottomPart.castShadow = true;
+  treeBottomPart.receiveShadow = true;
+  this.mesh.add(treeBottomPart);
+
+  /*var geom = new THREE.CylinderGeometry(50,120,100,100,100);
+  var mat = new THREE.MeshPhongMaterial({color:Colors.green, shading:THREE.FlatShading});
+  var tree2Part = new THREE.Mesh(geom.clone(), mat);
+  //treeTopPart.scale.set(.5,.5,.5);
+  tree2Part.position.set(0,180,0);
+  tree2Part.castShadow = true;
+  tree2Part.receiveShadow = true;
+  this.mesh.add(tree2Part);
+
+  /*var geom = new THREE.CylinderGeometry(0,70,100,100,100);
+  var mat = new THREE.MeshPhongMaterial({color:Colors.green, shading:THREE.FlatShading});
+  var treeTopPart = new THREE.Mesh(geom.clone(), mat);
+  //treeTopPart.scale.set(.33,.33,.33);
+  treeTopPart.position.set(0,280,0);
+  treeTopPart.castShadow = true;
+  treeTopPart.receiveShadow = true;
+  this.mesh.add(treeTopPart);*/
+}
+
+TreeSpruce = function(){
+  this.mesh = new THREE.Object3D();
+  this.mesh.name = "TreeSpruce";
+
+  var geom = new THREE.CylinderGeometry(3,3,4,6,10);
   var treeWoodenPart = new THREE.Mesh(geom, new THREE.MeshPhongMaterial({color:0x472500, shading:THREE.FlatShading}));
   treeWoodenPart.castShadow = true;
   treeWoodenPart.receiveShadow = true;
   this.mesh.add(treeWoodenPart);
 
-  var geom = new THREE.CylinderGeometry(0,140,320,100,100);
+  var geom = new THREE.CylinderGeometry(0,14,32,30,100);
   var mat = new THREE.MeshPhongMaterial({color:Colors.green, shading:THREE.FlatShading});
   var treeBottomPart = new THREE.Mesh(geom, new THREE.MeshPhongMaterial({color:Colors.green, shading:THREE.FlatShading}));
-  treeBottomPart.position.set(0,180,0);
+  treeBottomPart.position.set(0,18,0);
   treeBottomPart.castShadow = true;
   treeBottomPart.receiveShadow = true;
   this.mesh.add(treeBottomPart);
@@ -718,12 +766,16 @@ TreesHolder = function(nTrees){
   this.mesh = new THREE.Object3D();
   this.treesInUse = [];
   this.treesPool = [];
+
   for (var i = 0; i < nTrees; i++) {
-    var tree = new Tree();
+    if ( Math.round(Math.random()*(2-1)+1) > 1) {
+      var tree = new TreeSpruce();
+    }else {
+      var tree = new TreeBirch();
+
+    }
     this.treesPool.push(tree);
   }
-
-
 }
 
 TreesHolder.prototype.spawnTrees = function(){
@@ -731,19 +783,18 @@ TreesHolder.prototype.spawnTrees = function(){
     if (this.treesPool.length) {
       tree = this.treesPool.pop();
     }else{
-      tree = new Tree();
+      tree = new TreeSpruce();
     }
     var scale = Math.random()*(1.4 - .8) + .8;
-    tree.mesh.scale.set(scale,scale,scale);
+    tree.mesh.scale.set(scale*10,scale*10,scale*10);
     tree.mesh.position.y = -200 + 60*(scale - scale/2);
-    if ( Math.random()*(2-1)+1 > 1) {
+    if ( Math.round(Math.random()*(2-1)+1) > 1) {
       tree.mesh.position.z = -10000;
       tree.mesh.position.x = Math.random()*(-3000 - -530) + -530;
     } else {
       tree.mesh.position.z = -10000;
       tree.mesh.position.x = Math.random()*(3000 - 530) + 530;
     }
-    console.log(tree.mesh.position.x,tree.mesh.position.y,tree.mesh.position.z);
     this.mesh.add(tree.mesh);
     this.treesInUse.push(tree);
 }
@@ -990,7 +1041,7 @@ function createSky(){
 }
 
 function createTree(){
-  TreesHolder = new TreesHolder(18);
+  TreesHolder = new TreesHolder(40);
   scene.add(TreesHolder.mesh)
 }
 
