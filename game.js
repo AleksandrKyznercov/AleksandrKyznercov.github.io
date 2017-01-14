@@ -10,7 +10,7 @@ var Colors = {
     brownDark:0x23190f,
     blue:0x68c3c0,
     green: 0x556B2F,
-    pesoch: 0x9c7130,
+    send: 0x9c7130,
     white2:0xFFFFFF,
 };
 
@@ -77,7 +77,7 @@ var game = {speed:50,
         mineDistanceTolerance:100,
         mineLastSpawn:0,
         distanceForMineSpawn:200,
-
+        day:"day",
 
         status : "starting",
        };
@@ -178,17 +178,13 @@ function createScene() {
     );
 
   //Туман
-  scene.fog = new THREE.Fog(0xf7d9aa, 10,10000);
+  scene.fog = new THREE.Fog(0xf7d9aa, 10,10000);//f7d9aa
 
   camera.rotation.x = -.2;
   camera.rotation.y = 2.2;
   camera.position.x = 350;
   camera.position.y = -100;
   camera.position.z = -950;
-  /*camera.position.x = 0;
-  camera.position.z = 200;
-  camera.position.y = 100;*/
-
 
   renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
   renderer.setSize(WIDTH, HEIGHT);
@@ -198,6 +194,7 @@ function createScene() {
 
   window.addEventListener('resize', handleWindowResize, false);
 }
+
 function startGame(){
  messageStart.style.display = "block";
 }
@@ -257,7 +254,7 @@ function resetGame(){
           game.coinsSpeed:.5;
           game.coinLastSpawn:0;
           game.distanceForCoinsSpawn:100;
-game.ennemyDistanceTolerance:10;
+          game.ennemyDistanceTolerance:10;
 
           game.ennemyValue:10;
           game.ennemiesSpeed:.6;
@@ -286,11 +283,12 @@ function handleWindowResize() {
 // LIGHTS
 
 var ambientLight, hemisphereLight, shadowLight;
+var leftHeadlight,rightHeadlight,backLeftHeadlight,backRightHeadlight;
 
 function createLights() {
 
-  hemisphereLight = new THREE.HemisphereLight(0xaaaaaa,0x000000, .9)
-  shadowLight = new THREE.DirectionalLight(0xffffff, .9);
+  hemisphereLight = new THREE.HemisphereLight(0xffffff,0x000000, .9)
+  shadowLight = new THREE.DirectionalLight(0xffffff, .8);
   shadowLight.position.set(100, 350, -200);
   shadowLight.castShadow = true;
   shadowLight.shadow.camera.left = -1000;
@@ -306,68 +304,40 @@ function createLights() {
   scene.add(shadowLight);
 }
 
-var AirPlane = function(){
-	this.mesh = new THREE.Object3D();
-  this.mesh.name = "airPlane";
+function createCarHeadlight() {
 
-  // Create the cabin
-	var geomCockpit = new THREE.BoxGeometry(60,50,50,1,1,1);
-  var matCockpit = new THREE.MeshPhongMaterial({color:Colors.red, shading:THREE.FlatShading});
-  var cockpit = new THREE.Mesh(geomCockpit, matCockpit);
-	cockpit.castShadow = true;
-  cockpit.receiveShadow = true;
-  this.mesh.add(cockpit);
+  /*lightHelper1 = new THREE.SpotLightHelper( leftHeadlight );
+  lightHelper2 = new THREE.SpotLightHelper( rightHeadlight );
+  scene.add( lightHelper1 );
+  scene.add( lightHelper2 );*/
+}
 
-  // Create Engine
-  var geomEngine = new THREE.BoxGeometry(20,50,50,1,1,1);
-  var matEngine = new THREE.MeshPhongMaterial({color:Colors.white, shading:THREE.FlatShading});
-  var engine = new THREE.Mesh(geomEngine, matEngine);
-  engine.position.x = 40;
-  engine.castShadow = true;
-  engine.receiveShadow = true;
-	this.mesh.add(engine);
+function setDay() {
+  if (game.day == "night") {
+    scene.fog = new THREE.Fog(0xf7d9aa, 10,10000);
+    //$('.world').animate({background : "linear-gradient(#e4e0ba, #f7d9aa)"});
+    world.style.color = "black";
+    world.style.background = "linear-gradient(#e4e0ba, #f7d9aa)";
+    game.day = "day";
+  }else if (game.day == "day"){
+    scene.fog = new THREE.Fog(0x000000, 10,10000);
+    //$(".world").animate({background : "black"}, 1000);
+    world.style.background = "linear-gradient(#000000, #000000)";
+    world.style.color = "white";
+    soundButton.style.border = "4px solid white";
+    game.day = "night";
+  }
+}
 
-  // Create Tailplane
-
-  var geomTailPlane = new THREE.BoxGeometry(15,20,5,1,1,1);
-  var matTailPlane = new THREE.MeshPhongMaterial({color:Colors.red, shading:THREE.FlatShading});
-  var tailPlane = new THREE.Mesh(geomTailPlane, matTailPlane);
-  tailPlane.position.set(-35,25,0);
-  tailPlane.castShadow = true;
-  tailPlane.receiveShadow = true;
-	this.mesh.add(tailPlane);
-
-  // Create Wing
-
-  var geomSideWing = new THREE.BoxGeometry(40,8,150,1,1,1);
-  var matSideWing = new THREE.MeshPhongMaterial({color:Colors.red, shading:THREE.FlatShading});
-  var sideWing = new THREE.Mesh(geomSideWing, matSideWing);
-  sideWing.position.set(0,0,0);
-  sideWing.castShadow = true;
-  sideWing.receiveShadow = true;
-	this.mesh.add(sideWing);
-
-  // Propeller
-
-  var geomPropeller = new THREE.BoxGeometry(20,10,10,1,1,1);
-  var matPropeller = new THREE.MeshPhongMaterial({color:Colors.brown, shading:THREE.FlatShading});
-  this.propeller = new THREE.Mesh(geomPropeller, matPropeller);
-  this.propeller.castShadow = true;
-  this.propeller.receiveShadow = true;
-
-  // Blades
-
-  var geomBlade = new THREE.BoxGeometry(1,100,20,1,1,1);
-  var matBlade = new THREE.MeshPhongMaterial({color:Colors.brownDark, shading:THREE.FlatShading});
-
-  var blade = new THREE.Mesh(geomBlade, matBlade);
-  blade.position.set(8,0,0);
-  blade.castShadow = true;
-  blade.receiveShadow = true;
-	this.propeller.add(blade);
-  this.propeller.position.set(50,0,0);
-  this.mesh.add(this.propeller);
-};
+function updateDay() {
+  if (game.day == "night") {
+    if (hemisphereLight.intensity >= 0) hemisphereLight.intensity -= .02;
+    if (shadowLight.intensity >= 0.08) shadowLight.intensity -= .02;
+  } else {
+    if (hemisphereLight.intensity <= .9) hemisphereLight.intensity += .02;
+    if (shadowLight.intensity <= .8) shadowLight.intensity += .02;
+  }
+}
 
 Car = function(){
   this.mesh = new THREE.Object3D();
@@ -489,6 +459,45 @@ Car = function(){
   wheel4.mesh.rotation.y = Math.PI/2;
   wheel4.mesh.position.set(85,-40,70);
   this.mesh.add(wheel4.mesh);
+
+  //LIGHTS
+  leftHeadlight = new THREE.SpotLight( 0xffffff, 0);
+  leftHeadlight.position.set(-50, -120, -810);
+  leftHeadlight.castShadow = true;
+  leftHeadlight.penumbra = .2;
+  leftHeadlight.angle = .8; //(Math.PI, 0, 0);
+
+  rightHeadlight = new THREE.SpotLight( 0xffffff, 0);
+  rightHeadlight.position.set(50, -120, -810);
+  rightHeadlight.castShadow = true;
+  rightHeadlight.penumbra = .2;
+  rightHeadlight.angle = .8;
+  scene.add( leftHeadlight );
+  scene.add( rightHeadlight );
+
+  leftHeadlight.target.position.set(-50, -200, -1100);
+  rightHeadlight.target.position.set(50, -200, -1100);
+  scene.add( leftHeadlight.target );
+  scene.add( rightHeadlight.target );
+
+  var backHeadlightGeometry = new THREE.BoxGeometry(8,20,3,1,1,1);
+      backHeadlight = new THREE.MeshStandardMaterial( {
+        color:Colors.red,
+        emissiveIntensity: 1
+      });
+      leftBackHeadlight_mesh = new THREE.Mesh( backHeadlightGeometry, backHeadlight );
+      rightBackHeadlight_mesh = new THREE.Mesh( backHeadlightGeometry, backHeadlight );
+      backLeftHeadlight = new THREE.PointLight( Colors.red, 0, 800, 8 );
+      backRightHeadlight = new THREE.PointLight( Colors.red, 0, 800, 8 );
+      backLeftHeadlight.add( leftBackHeadlight_mesh );
+      backRightHeadlight.add( rightBackHeadlight_mesh );
+      backLeftHeadlight.position.set( -80, 0, 138 );
+      backRightHeadlight.position.set( 80, 0, 138 );
+      backLeftHeadlight.castShadow = true;
+      backRightHeadlight.castShadow = true;
+
+      this.mesh.add( backLeftHeadlight );
+      this.mesh.add( backRightHeadlight );
 }
 
 Sky = function(){
@@ -525,9 +534,18 @@ Sea = function(){
 }
 
 Ground = function(){
+  /*var texture = new THREE.ImageUtils.loadTexture('images/send1.jpg');
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set( 10,10);*/
+    /*var lightmap = new THREE.ImageUtils.loadTexture('images/lightmap1.jpg');
+    lightmap.wrapS = THREE.RepeatWrapping;
+    lightmap.wrapT = THREE.RepeatWrapping;
+    lightmap.repeat.set( 4, 4 );*/
   var geom = new THREE.BoxGeometry(10000,8,15000,1,1);
   var mat = new THREE.MeshPhongMaterial({
-    color:Colors.pesoch
+    //map:texture,
+    color:Colors.send
   });
   this.mesh = new THREE.Mesh(geom, mat);
   this.mesh.receiveShadow = true;
@@ -685,8 +703,36 @@ MinesHolder.prototype.rotateMines = function(){
   }
 }
 
+PTRK_Rocket = function(){
+  this.mesh = new THREE.Object3D();
+  this.mesh.name = "PTRK_Rocket";
+
+  var geom = new THREE.CylinderGeometry(15,15,6,40,100);
+  var mat = new THREE.MeshPhongMaterial({color:0x384521, shading:THREE.FlatShading});
+  var mineBottomPart = new THREE.Mesh(geom, mat);
+  mineBottomPart.castShadow = true;
+  mineBottomPart.receiveShadow = true;
+  this.mesh.add(mineBottomPart);
+
+  var geom = new THREE.CylinderGeometry(8,10,2,40,100);
+  var mat = new THREE.MeshPhongMaterial({color:0x384521, shading:THREE.FlatShading});
+  var mineTopPart = new THREE.Mesh(geom, mat);
+  mineTopPart.position.set(0,4,0);
+  mineTopPart.castShadow = true;
+  mineTopPart.receiveShadow = true;
+  this.mesh.add(mineTopPart);
+
+  var geom = new THREE.CylinderGeometry(5,5,2,40,100);
+  var mat = new THREE.MeshPhongMaterial({color:0x1c1c1c, shading:THREE.FlatShading});
+  var mineFusePart = new THREE.Mesh(geom, mat);
+  mineFusePart.position.set(0,5,0);
+  mineFusePart.castShadow = true;
+  mineFusePart.receiveShadow = true;
+  this.mesh.add(mineFusePart);
+}
+
 WhiteLine = function(){
-  var geom = new THREE.BoxGeometry(40,10,200,1,1);
+  var geom = new THREE.BoxGeometry(40,9.4,200,1,1);
   var mat = new THREE.MeshPhongMaterial({
     color:Colors.white
   });
@@ -791,8 +837,35 @@ function createRoad(){
   //road.mesh.scale.set(.25,.25,.25);
   road.mesh.position.y = -200;
   road.mesh.position.z = -5000;
-
   scene.add(road.mesh);
+}
+
+function createUAZ_JSON(){
+    var mesh, loader;
+      loader = new THREE.JSONLoader();
+      loader.load( "uaz.json", function( geometry ) {
+
+          mesh = new THREE.Mesh( geometry, new THREE.MeshNormalMaterial() );
+          mesh.scale.set( 1, 1, 1 );
+          mesh.position.y = -200;
+          mesh.position.x = 0;
+          scene.add( mesh );console.log("yes");
+      } );
+}
+function createUAZ_Ply(){
+  var loader = new THREE.PLYLoader();
+  loader.load( 'uazik3ds.ply', function ( geometry ) {
+    geometry.computeVertexNormals();
+    var material = new THREE.MeshStandardMaterial( { color: 0x0055ff, shading: THREE.FlatShading } );
+    var mesh = new THREE.Mesh( geometry, material );
+    mesh.position.y = - 0.2;
+    mesh.position.z =   0.3;
+    mesh.rotation.x = - Math.PI / 2;
+    mesh.scale.multiplyScalar( 0.001 );
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    scene.add( mesh );
+  } );
 }
 
 function createWhiteLine(){
@@ -817,25 +890,11 @@ function createCar(){
 //Препядствия
 
 function createMine(){
-  /*mine = new Mine();
-  mine.mesh.position.y = -192;
-  mine.mesh.position.x =
-  mine.mesh.position.z = -550;
-  scene.add(mine.mesh);*/
   MinesHolder = new MinesHolder(1);
   scene.add(MinesHolder.mesh)
-  /*
-  for (var i = 0; i < 10000; i += 800){
-    mine = new Mine();
-    mine.mesh.position.y = -192;
-    mine.mesh.position.x = Math.random()*(430+430)-430;
-    mine.mesh.position.z = -550;
-    minesPool.push(mine);
-  }
-  MinesHolder = new MinesHolder();
-  scene.add(MinesHolder.mesh)
-*/
 }
+
+//--------------
 
 function createPlane(){
   airplane = new AirPlane();
@@ -865,52 +924,56 @@ function gameOver() {
 
 var delta = 0;
 function loop(){
-if (game.status != "pause"){
-  newTime = new Date().getTime();
-  deltaTime = newTime-oldTime;
-  oldTime = newTime;
+  if (game.status != "pause"){
+    newTime = new Date().getTime();
+    deltaTime = newTime-oldTime;
+    oldTime = newTime;
 
-  if (game.status == "starting"){
-    if (soundEngStart.currentTime){
-      engHolost.play();
+    if (game.status == "starting"){
+      if (soundEngStart.currentTime){
+          engHolost.play();
+      }
     }
-  }
-  if (game.status == "playing") {
-    updateCamera();
-    updateCar();
+    if (game.status == "playing") {
+      updateCamera();
+      updateCar();
 
-    if (game.speed<game.maxSpeed){
-      game.speed += 0.01;
-      speedChanger.value = Math.floor(game.speed);
+    //leftHeadlight.rotation.y += 0.1;
+      //leftHeadlight.rotation.z += 0.1;
+      //ground.mesh.material.map.wrapT = THREE.RepeatWrapping;// += game.speed;
+      if (game.speed<game.maxSpeed){
+        game.speed += 0.01;
+        //speedChanger.value = Math.floor(game.speed);
+      }
+
+
+      if (Math.floor(game.distance)%game.distanceForLinesSpawn == 0 && Math.floor(game.distance) > game.lineLastSpawn){
+        console.log('inUse Lines'+WhiteLinesHolder.whiteLinesInUse.length);
+        game.lineLastSpawn = Math.floor(game.distance);
+        WhiteLinesHolder.spawnWhiteLines();
+      }
+
+      if (Math.floor(game.distance)%game.distanceForMineSpawn == 0 && Math.floor(game.distance) > game.mineLastSpawn){
+        game.mineLastSpawn = Math.floor(game.distance);
+        MinesHolder.spawnMines();
+      }
+
+
+      game.distance += game.speed/100;
+      //game.distance++;
+      distanceLabel.innerHTML = (game.distance/1000).toFixed(2) + " Км";
+      speedLabel.innerHTML = "Уазик алгует со скоростью: " + Math.floor(game.speed) + " Км/ч";
     }
+    if (game.status == "gameover") {
+      game.speed *= .98;
+      car.mesh.rotation.y = car.mesh.rotation.y*0.975;
+      car.mesh.rotation.z = car.mesh.rotation.z*0.975;
+      //car.mesh.material.color.set(Color.red);
 
-
-    if (Math.floor(game.distance)%game.distanceForLinesSpawn == 0 && Math.floor(game.distance) > game.lineLastSpawn){
-      console.log('inUse Lines'+WhiteLinesHolder.whiteLinesInUse.length);
-      game.lineLastSpawn = Math.floor(game.distance);
-      WhiteLinesHolder.spawnWhiteLines();
     }
-
-    if (Math.floor(game.distance)%game.distanceForMineSpawn == 0 && Math.floor(game.distance) > game.mineLastSpawn){
-      game.mineLastSpawn = Math.floor(game.distance);
-      MinesHolder.spawnMines();
-    }
-
-
-    game.distance += game.speed/100;
-    //game.distance++;
-    distanceLabel.innerHTML = (game.distance/1000).toFixed(2) + " Км";
-    speedLabel.innerHTML = "Уазик алгует со скоростью: " + Math.floor(game.speed) + " Км/ч";
-  }
-  if (game.status == "gameover") {
-    game.speed *= .98;
-    car.mesh.rotation.y = car.mesh.rotation.y*0.975;
-    car.mesh.rotation.z = car.mesh.rotation.z*0.975;
-    //car.mesh.material.color.set(Color.red);
-
-  }
-  WhiteLinesHolder.rotateWhiteLines();
-  MinesHolder.rotateMines();
+    updateDay();
+    WhiteLinesHolder.rotateWhiteLines();
+    MinesHolder.rotateMines();
 }
   renderer.render(scene, camera);
   requestAnimationFrame(loop);
@@ -957,6 +1020,16 @@ function updateCar(){
   var targetX = normalize(mousePos.x,-.75,.75,-380, 380);
   car.mesh.position.x += (targetX - car.mesh.position.x)*0.1;
   car.mesh.position.z = targetY;//+y лево, -y право
+
+  leftHeadlight.position.x = car.mesh.position.x - 50;
+  leftHeadlight.position.z = car.mesh.position.z - 210;
+  rightHeadlight.position.x = car.mesh.position.x + 50;
+  rightHeadlight.position.z = car.mesh.position.z - 210;
+  leftHeadlight.target.position.set(leftHeadlight.position.x, -200, leftHeadlight.position.z-200);
+  rightHeadlight.target.position.set(rightHeadlight.position.x, -200, rightHeadlight.position.z-200);
+  scene.add( leftHeadlight.target );
+  scene.add( rightHeadlight.target );
+
   car.mesh.rotation.y = (car.mesh.position.x - targetX)*0.002;
   car.mesh.rotation.z = (targetX - car.mesh.position.x)*0.0007;
   wheel1.mesh.rotation.x -= game.speed/70;//0.15;
@@ -968,7 +1041,7 @@ function updateCar(){
 }
 
 function pauseGame(event){
-  if (game.status != "starting"){
+  if ( event.charCode == 32 && (game.status == "playing" || game.status == "pause")){
     if (event.charCode == 32 && game.status != "pause"){
       game.status = "pause";
       messagePause.style.display = "block";
@@ -977,6 +1050,21 @@ function pauseGame(event){
       messagePause.style.display = "none";
     }
     soundMute();
+  }
+  if ((event.charCode == 76 || event.charCode == 108) && (leftHeadlight.intensity > 0)) {
+    leftHeadlight.intensity = 0;
+    rightHeadlight.intensity = 0;
+    rightBackHeadlight_mesh.material.emissive.setHex(0x000000);
+    leftBackHeadlight_mesh.material.emissive.setHex(0x000000);
+    backLeftHeadlight.intensity = 0;
+    backRightHeadlight.intensity = 0;
+  }else if (event.charCode == 76 || event.charCode == 108) {
+    leftHeadlight.intensity = 2;
+    rightHeadlight.intensity = 2;
+    rightBackHeadlight_mesh.material.emissive.setHex(Colors.red);
+    leftBackHeadlight_mesh.material.emissive.setHex(Colors.red);
+    backLeftHeadlight.intensity = 1;
+    backRightHeadlight.intensity = 1;
   }
 }
 
@@ -1003,6 +1091,7 @@ function init(event){
   camera_x = document.getElementById("camera_x");
   camera_y = document.getElementById("camera_y");
   camera_z = document.getElementById("camera_z");
+  setDayButton = document.getElementById("setDayButton");
   /*energyBar = document.getElementById("energyBar");
   replayMessage = document.getElementById("replayMessage");
   fieldLevel = document.getElementById("levelValue");
@@ -1014,17 +1103,22 @@ function init(event){
 
   createLights();
   //createText();
+  //createUAZ_JSON();
   startGame();
   createRoad();
   createGround();
   createWhiteLine();
   createCar();
+  createCarHeadlight();
+
   //car.mesh.material.emissive.setHex( 0xff0000 );
   createMine();
+  //createUAZ_Ply();
   //cuzov.mesh.material.color.setHex( 0xff0000 );
   //soundEngStart();oninput
-  speedChanger.addEventListener('click', changeSpeed, false);
+  //speedChanger.addEventListener('click', changeSpeed, false);
   soundButton.addEventListener('click', soundMute, false);
+  setDayButton.addEventListener('click', setDay, false);
   messageStart.addEventListener('click', resetGame, false);
   messageGameOver.addEventListener('click', resetGame, false);
   messagePause.addEventListener('click', pauseGame, false);

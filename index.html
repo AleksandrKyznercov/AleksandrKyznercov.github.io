@@ -5,7 +5,11 @@
 		<meta charset="UTF-8"/>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<meta property="og:locale" content="ru_RU">
+		<link rel="icon" href="uaz.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="uaz.ico" type="image/x-icon">
+		<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 		<script type="text/javascript" src="three.js"></script>
+		<script src="PLYLoader.js"></script>
     <script type="text/javascript" src="game.js"></script>
 		<link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
 		<style>
@@ -16,16 +20,17 @@
   				font-size: 100%;
   				font: inherit;
   				vertical-align: baseline;
-					}
+				}
 		  .world {
+				  font-family: 'Press Start 2P', cursive;
 		      position: absolute;
           width: 100%;
           height: 100%;
-          background: linear-gradient(#e4e0ba, #f7d9aa);
+          background: linear-gradient(#e4e0ba, #f7d9aa);/*linear-gradient(#e4e0ba, #f7d9aa);*/
 		      overflow: hidden;
+					color: black;
 		      }
 			.text1 {
-				font-family: 'Press Start 2P', cursive;
 				position: absolute;
 				top: 10px;
 				left: 20px;
@@ -93,7 +98,6 @@
 				text-align: center;
 			}
 			.distance {
-				font-family: 'Press Start 2P', cursive;
 				position: absolute;
 				top: 38px;
 				left: 340px;
@@ -101,7 +105,6 @@
 			/*	text-align: center;*/
 			}
 			.message {
-				font-family: 'Press Start 2P', cursive;
 				position: absolute;
 				bottom: 50vh;
 				left: 0;
@@ -127,7 +130,6 @@
 			/*	text-align: center;*/
 			}
 			.soundButton {
-				/*background: lightblue;*/
 				border: 4px solid black;
 				font-family: 'Press Start 2P', cursive;
 				position: absolute;
@@ -163,29 +165,40 @@
 				font-size: 16px;
 			}
 			.speed{
-				font-family: 'Press Start 2P', cursive;/*Zeppelin32*/
+				/*Zeppelin32*/
 				position: absolute;
 				top: 20px;
 				left: 600px;
 				width: 300px;
 				font-size: 16px;
 			}
+			.setDayButton {
+				position: absolute;
+				top: 6px;
+				right: 120px;
+				width: 70px;
+				height: 70px;
+  	 	  text-align: center;
+			  cursor: pointer;
+			}
 		</style>
 	</head>
 	<body>
 
     <div id="world" class="world">
-			<div id="messageStart" class="message">START</div>
-			<div id="messagePause" class="message">PAUSE</div>
-			<div id="messageGameOver" class="message">GAME OVER</div>
+			<span id="messageStart" class="message">START</span>
+			<span id="messagePause" class="message">PAUSE</span>
+			<span id="messageGameOver" class="message">GAME OVER</span>
 
-			<div id="speed" class="speed">Уазик алгует со скоростью: 50 Км/ч</div>
-			<input type="range" min="50" max="200" step="1" value="50" id="speedChanger" class="speedChanger">
-	  </div>
-		<h1 class="text1">УАЗик!<span class="text2"> на фланге...</span></h1>
-		<div id="soundButton" class="soundButton" value="Вкл">Вкл</div>
-		<div id="distance_text" class="distance_text">Уазик не <br>горел уже:</div>
-		<div id="distance" class="distance"></div>
+			<span id="speed" class="speed">Уазик алгует со скоростью: 50 Км/ч</span>
+			<!--<input type="range" min="50" max="200" step="1" value="50" id="speedChanger" class="speedChanger">-->
+
+			<h1 class="text1">УАЗик!<span class="text2"> на фланге...</span></h1>
+			<span id="soundButton" class="soundButton" value="Вкл">Вкл</span>
+			<img id="setDayButton" class="setDayButton" value="day" src="images/dayOrNight.png" href="#">
+			<span id="distance_text" class="distance_text">Уазик не <br>горел уже:</span>
+			<span id="distance" class="distance"></span>
+		</div>
 		<!--<div class="camera">
 			<div id="camera_x" class="camera_x">0</div>
 			<div id="camera_y" class="camera_y">0</div>
